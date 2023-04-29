@@ -409,12 +409,21 @@ async function endQuiz(curUser) {
       }),
     }
   );
-  if (!curUser.isOutQuiz)
+  if (!curUser.isOutQuiz) {
     curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, `Результат: ${curUser.points}`)
-  );
+    await bot.sendMessageDelay(
+      curUser,
+      await translate(curUser.language, `Результат: ${curUser.points}`)
+    );
+  } else {
+    await bot.sendMessageDelay(
+      curUser,
+      await translate(
+        curUser.language,
+        `Напоминаю, что как результат учитывается только первое прохождение)`
+      )
+    );
+  }
   curUser.isInQuiz = false;
   curUser.isOutQuiz = true;
 }
