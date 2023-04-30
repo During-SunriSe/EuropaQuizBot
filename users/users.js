@@ -1,20 +1,7 @@
 import User from "./User.js";
 import fs from "fs";
-import AWS from "aws-sdk";
-import env from "dotenv";
 
-env.config();
-
-const s3 = new AWS.S3();
-
-let users;
-s3.getObject(
-  { Bucket: "europaquizbot", Key: "users.json" },
-  function (err, data) {
-    if (!err) users = JSON.parse(data.Body.toString());
-    else users = JSON.parse(fs.readFileSync("./users/users.json").toString());
-  }
-);
+const users = JSON.parse(fs.readFileSync("./users/users.json").toString());
 
 export async function userCheck(msgFrom) {
   let savedUser = users.find((user) => user.telegramId === msgFrom.id);
@@ -55,26 +42,6 @@ export async function saveUsers() {
   for (const user of users) {
     user.botIsTexting = false;
   }
-
-  const buf = Buffer.from(JSON.stringify(users));
-
-  const data = {
-    Bucket: "europaquizbot",
-    Key: "users.json",
-    Body: buf,
-    ContentEncoding: "base64",
-    ContentType: "application/json",
-    ACL: "public-read",
-  };
-
-  s3.upload(data, function (err, data) {
-    if (err) {
-      console.log(err);
-      console.log("Error uploading data: ", data);
-    } else {
-      console.log("succesfully uploaded!!!");
-    }
-  });
   try {
     fs.writeFile(
       "./users/users.json",
@@ -88,4 +55,8 @@ export async function saveUsers() {
 
     process.exit(1);
   }
+}
+
+export async function getJSON(bot, ADMIN_ID) {
+  await bot.sendDocument(ADMIN_ID, "./users.json");
 }

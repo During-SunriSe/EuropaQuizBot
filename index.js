@@ -5,6 +5,7 @@ import {
   checkAge,
   checkCategory,
   saveUsers,
+  getJSON,
 } from "./users/users.js";
 import { translate } from "./translator.js";
 import {
@@ -46,6 +47,9 @@ function start() {
         await translate(curUser.language, "Прости, я тебя не понимаю")
       );
       return;
+    }
+    if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
+      await getJSON(bot, ADMIN_ID);
     }
 
     if (text === "/start") {
