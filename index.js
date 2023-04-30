@@ -50,6 +50,7 @@ function start() {
     }
     if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
       await getJSON(bot, ADMIN_ID);
+      return;
     }
 
     if (text === "/start") {
