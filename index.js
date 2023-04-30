@@ -438,6 +438,7 @@ async function endQuiz(curUser) {
       )
     );
   }
+  curUser.questionNumber = 0;
   curUser.isInQuiz = false;
   curUser.isOutQuiz = true;
 }
