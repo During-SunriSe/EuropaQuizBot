@@ -81,7 +81,7 @@ function start() {
           curUser.category
         );
         await sendAnswer(curUser, res);
-      } else if (curUser.isOutQuiz) {
+      } else if (curUser.isOutQuiz && curUser.questionNumber === 0) {
         await endMenu(curUser);
       } else
         await bot.sendMessageDelay(

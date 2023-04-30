@@ -1,1 +1,35 @@
-[{"telegramId":512962834,"username":"BohdanTut","language":"","category":0,"questionNumber":0,"curPoints":[],"points":0,"isLanguageChoosing":false,"isNameWriting":false,"isAgeWriting":false,"isInQuiz":false,"isOutQuiz":false,"botIsTexting":false}]
+[
+  {
+    "telegramId": 512962834,
+    "username": "BohdanTut",
+    "language": "ru",
+    "category": 0,
+    "questionNumber": 0,
+    "curPoints": [3, 3, 3],
+    "points": 9,
+    "isLanguageChoosing": false,
+    "isNameWriting": false,
+    "isAgeWriting": false,
+    "isInQuiz": true,
+    "isOutQuiz": true,
+    "botIsTexting": false,
+    "name": "Bohdan",
+    "age": 9
+  },
+  {
+    "telegramId": 551228050,
+    "name": "Наталия",
+    "age": 15,
+    "language": "ru",
+    "category": 1,
+    "questionNumber": 1,
+    "curPoints": [3, 3, 0],
+    "points": 6,
+    "isLanguageChoosing": false,
+    "isNameWriting": false,
+    "isAgeWriting": false,
+    "isInQuiz": true,
+    "isOutQuiz": true,
+    "botIsTexting": false
+  }
+]
