@@ -1,5 +1,6 @@
 import User from "./User.js";
 import fs from "fs";
+import process from "node:process";
 
 const users = JSON.parse(fs.readFileSync("./users/users.json").toString());
 
@@ -58,5 +59,5 @@ export async function saveUsers() {
 }
 
 export async function getJSON(bot, ADMIN_ID) {
-  await bot.sendDocument(ADMIN_ID, "./users.json");
+  await bot.sendDocument(ADMIN_ID, "./users/users.json");
 }

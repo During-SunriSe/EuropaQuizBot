@@ -48,48 +48,53 @@ function start() {
       );
       return;
     }
+
     if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
       await getJSON(bot, ADMIN_ID);
       return;
     }
-
-    if (text === "/start") {
-      await startScreen(curUser);
-    } else if (text === "/restart") {
-      await restartQuiz(curUser);
-    } else if (text === "/info") {
-      await sendInfo(curUser);
-    } else if (text === "/language") {
-      await changeLanguage(curUser);
-    } else if (curUser.isAgeWriting) {
-      await lookAtAge(curUser, text);
-    } else if (curUser.isNameWriting) {
-      await lookAtName(curUser, text);
-    } else if (curUser.isLanguageChoosing) {
-      await bot.sendMessageDelay(
-        curUser,
-        await translate(
-          curUser.language ? curUser.language : "uk",
-          "Сначала выбери, пожалуйста, язык 🙃"
-        )
-      );
-    } else if (curUser.isInQuiz) {
-      const res = await checkAnswer(
-        curUser.questionNumber,
-        text,
-        curUser.category
-      );
-      await sendAnswer(curUser, res);
-    } else if (curUser.isOutQuiz) {
-      await endMenu(curUser);
-    } else
-      await bot.sendMessageDelay(
-        curUser,
-        await translate(
-          curUser.language,
-          "Чтобы продолжить, ознакомься с текстом и нажми на кнопку под ним)"
-        )
-      );
+    try {
+      if (text === "/start") {
+        await startScreen(curUser);
+      } else if (text === "/restart") {
+        await restartQuiz(curUser);
+      } else if (text === "/info") {
+        await sendInfo(curUser);
+      } else if (text === "/language") {
+        await changeLanguage(curUser);
+      } else if (curUser.isAgeWriting) {
+        await lookAtAge(curUser, text);
+      } else if (curUser.isNameWriting) {
+        await lookAtName(curUser, text);
+      } else if (curUser.isLanguageChoosing) {
+        await bot.sendMessageDelay(
+          curUser,
+          await translate(
+            curUser.language ? curUser.language : "uk",
+            "Сначала выбери, пожалуйста, язык 🙃"
+          )
+        );
+      } else if (curUser.isInQuiz) {
+        const res = await checkAnswer(
+          curUser.questionNumber,
+          text,
+          curUser.category
+        );
+        await sendAnswer(curUser, res);
+      } else if (curUser.isOutQuiz) {
+        await endMenu(curUser);
+      } else
+        await bot.sendMessageDelay(
+          curUser,
+          await translate(
+            curUser.language,
+            "Чтобы продолжить, ознакомься с текстом и нажми на кнопку под ним)"
+          )
+        );
+    } catch (e) {
+      console.log(e);
+      await getJSON(bot, ADMIN_ID);
+    }
   });
   bot.on("polling_error", console.log);
   bot.on("webhook_error", (error) => {
@@ -103,22 +108,26 @@ function start() {
       text: callbackText,
       show_alert: true,
     });
-
-    if (curUser.isLanguageChoosing) {
-      if (msg.data === "uk" || msg.data === "ru") {
-        await languageIsChanged(curUser, msg.data);
+    try {
+      if (curUser.isLanguageChoosing) {
+        if (msg.data === "uk" || msg.data === "ru") {
+          await languageIsChanged(curUser, msg.data);
+        }
+      } else if (curUser.isNameWriting) {
+        if (msg.data === "yes") {
+          await nameApprove(curUser);
+        } else if (msg.data === "change") {
+          await addName(curUser, true);
+        }
+      } else if (
+        !curUser.isInQuiz &&
+        msg.data === `ok${curUser.questionNumber}`
+      ) {
+        await askQuestion(curUser);
       }
-    } else if (curUser.isNameWriting) {
-      if (msg.data === "yes") {
-        await nameApprove(curUser);
-      } else if (msg.data === "change") {
-        await addName(curUser, true);
-      }
-    } else if (
-      !curUser.isInQuiz &&
-      msg.data === `ok${curUser.questionNumber}`
-    ) {
-      await askQuestion(curUser);
+    } catch (e) {
+      console.log(e);
+      await getJSON(bot, ADMIN_ID);
     }
   });
 }
