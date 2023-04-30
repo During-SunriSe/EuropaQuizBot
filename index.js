@@ -24,6 +24,11 @@ const bot = new TelegramBot(process.env.BOT_TOKEN || BOT_TOKEN, {
 
 const ADMIN_ID = 512962834;
 
+process.on("uncaughtException", async (error, source) => {
+  console.log(error, source);
+  await bot.sendDocument(ADMIN_ID, "./users/users.json");
+});
+
 bot.setMyCommands([
   { command: "/restart", description: await translate("uk", "Начать заново") },
   { command: "/info", description: await translate("uk", "Информация") },
