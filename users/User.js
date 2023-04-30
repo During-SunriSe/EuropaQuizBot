@@ -14,6 +14,7 @@ class User {
   isInQuiz = false;
   isOutQuiz = false;
   botIsTexting = false;
+  sendedFile;
   constructor(telegramId, username) {
     this.telegramId = telegramId;
     this.username = username;
