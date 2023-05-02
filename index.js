@@ -23,7 +23,7 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, {
   polling: true,
 });
 
-const ADMIN_ID = process.env.ADMIN_ID;
+const ADMIN_ID = parseInt(process.env.ADMIN_ID);
 
 process.on("uncaughtException", async (error, source) => {
   console.log(error, source);
@@ -454,7 +454,7 @@ async function save() {
     await save();
     await saveUsers();
     setTimeout(async () => await setInfo(), 1000 * 60 * 2);
-  }, 1000 * 60 * 5);
+  }, 1000 * 60 * 3);
 }
 
 async function endMenu(curUser) {

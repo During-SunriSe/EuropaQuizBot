@@ -1,7 +1,7 @@
 import User from "./User.js";
 import fs from "fs";
 import process from "node:process";
-import users from "../redisConnect.js";
+import { users } from "../redisConnect.js";
 
 export async function userCheck(msgFrom) {
   let savedUser = users.find((user) => user.telegramId === msgFrom.id);
