@@ -1,8 +1,7 @@
 import User from "./User.js";
 import fs from "fs";
 import process from "node:process";
-
-const users = JSON.parse(fs.readFileSync("./users/users.json").toString());
+import users from "../redisConnect.js";
 
 export async function userCheck(msgFrom) {
   let savedUser = users.find((user) => user.telegramId === msgFrom.id);
@@ -15,11 +14,6 @@ export async function userCheck(msgFrom) {
 
 export async function checkName(text) {
   if (text.split(" ").length !== 1) return "long";
-  // let response = await fetch(
-  //   `https://www.behindthename.com/api/lookup.json?name=${text.toLowerCase()}&key=bo018949609`
-  // );
-  // let antwort = await response.json();
-  // if (antwort.error) return "any";
   text = text[0].toUpperCase() + text.slice(1).toLowerCase();
   return text;
 }

@@ -15,13 +15,15 @@ import {
   checkAnswer,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
-import { getJSONfromRedis } from "./users/redisConnect.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, {
   polling: true,
 });
 
-const ADMIN_ID = 512962834;
+const ADMIN_ID = process.env.ADMIN_ID;
 
 process.on("uncaughtException", async (error, source) => {
   console.log(error, source);
@@ -54,8 +56,7 @@ function start() {
     }
 
     if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
-      // await getJSON(bot, ADMIN_ID);
-      await getJSONfromRedis();
+      await getJSON(bot, ADMIN_ID);
       return;
     }
     try {
@@ -452,7 +453,7 @@ async function save() {
   setTimeout(async () => {
     await save();
     await saveUsers();
-    setTimeout(async () => await setInfo(), 1000 * 60 * 1);
+    setTimeout(async () => await setInfo(), 1000 * 60 * 2);
   }, 1000 * 60 * 5);
 }
 
