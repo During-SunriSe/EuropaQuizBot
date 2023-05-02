@@ -17,9 +17,7 @@ import {
 import { setInfo } from "./users/sheetsInfo.js";
 import { getJSONfromRedis } from "./users/redisConnect.js";
 
-const BOT_TOKEN = "5996542018:AAGOw8-n2RQiMTzDAXWK73k_daWB9skG0e8";
-
-const bot = new TelegramBot(process.env.BOT_TOKEN || BOT_TOKEN, {
+const bot = new TelegramBot(process.env.BOT_TOKEN, {
   polling: true,
 });
 
