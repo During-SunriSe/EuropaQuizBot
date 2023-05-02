@@ -15,7 +15,8 @@
     "fs": "^0.0.1-security",
     "googleapis": "^118.0.0",
     "node-telegram-bot-api": "^0.61.0",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "redis": "^4.6.6"
   },
   "nodemonConfig": {
     "ignore": [
