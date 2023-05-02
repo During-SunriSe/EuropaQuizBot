@@ -8,7 +8,7 @@ const client = redis.createClient(
   }
 );
 
-client.set("usersJSON", fs.readFileSync("./users.json").toString());
+client.set("usersJSON", fs.readFileSync("./users/users.json").toString());
 export async function getJSONfromRedis() {
   await client.get("usersJSON", function (err, reply) {
     console.log(reply.toString()); // Will print `bar`
