@@ -7,6 +7,7 @@ const client = redis.createClient(
     no_ready_check: true,
   }
 );
+await client.connect();
 
 client.set("usersJSON", fs.readFileSync("./users/users.json").toString());
 export async function getJSONfromRedis() {
