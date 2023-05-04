@@ -14,9 +14,7 @@ const client = createClient({
 
 await client.connect();
 
-export let users = await JSON.parse(
-  (await client.get("usersRedis")).toString()
-);
+export let users = JSON.parse((await client.get("usersRedis")).toString());
 
 await client.disconnect();
 
@@ -29,5 +27,5 @@ export async function saveUsersRedis() {
   } catch (e) {
     console.log(e);
   }
-  users = await JSON.parse((await client.get("usersRedis")).toString());
+  users = JSON.parse((await client.get("usersRedis")).toString());
 }
