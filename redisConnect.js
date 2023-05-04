@@ -13,21 +13,27 @@ const client = createClient({
 });
 
 await client.connect();
+let users = JSON.parse(await client.get("usersRedis"));
+try {
+  fs.writeFileSync(
+    "./users/users.json",
+    JSON.stringify(users),
+    function (err, file) {
+      if (err) throw err;
+    }
+  );
+} catch (err) {
+  console.log(err);
 
-let users = await client.get("usersRedis");
-
+  process.exit(1);
+}
 await client.disconnect();
 
 export async function saveUsersRedis() {
-  const usersJSON = JSON.stringify(
-    fs.readFileSync("./users/users.json").toString()
-  );
   try {
     await client.connect();
 
-    await client.set("usersRedis", usersJSON);
-
-    users = usersJSON;
+    await client.set("usersRedis", JSON.stringify(users));
 
     await client.disconnect();
   } catch (e) {
