@@ -1,7 +1,9 @@
 import User from "./User.js";
 import fs from "fs";
 import process from "node:process";
-import { users } from "../redisConnect.js";
+import { saveUsersRedis } from "../redisConnect.js";
+
+let users = JSON.parse(fs.readFileSync("./users/users.json").toString());
 
 export async function userCheck(msgFrom) {
   let savedUser = users.find((user) => user.telegramId === msgFrom.id);
@@ -50,6 +52,7 @@ export async function saveUsers() {
 
     process.exit(1);
   }
+  await saveUsersRedis();
 }
 
 export async function getJSON(bot, ADMIN_ID) {
