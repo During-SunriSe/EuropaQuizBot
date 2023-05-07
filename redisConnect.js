@@ -14,6 +14,9 @@ const client = createClient({
 
 await client.connect();
 let users = JSON.parse(await client.get("usersRedis"));
+for (const user of users) {
+  user.botIsTexting = false;
+}
 try {
   fs.writeFileSync(
     "./users/users.json",
