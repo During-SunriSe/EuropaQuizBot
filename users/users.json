@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "telegramId": 512962834,
+    "username": "BohdanTut",
+    "name": "Богдан",
+    "age": 9,
+    "language": "ru",
+    "category": 0,
+    "questionNumber": 0,
+    "curPoints": [2, 1, 3],
+    "points": 6,
+    "isLanguageChoosing": false,
+    "isNameWriting": false,
+    "isAgeWriting": false,
+    "isInQuiz": true,
+    "isOutQuiz": true,
+    "botIsTexting": false
+  },
+  {
+    "telegramId": 5891969809,
+    "username": "regas35",
+    "name": "Аюр",
+    "age": 20,
+    "language": "uk",
+    "category": 1,
+    "questionNumber": 0,
+    "curPoints": [2, 1, 3],
+    "points": 6,
+    "isLanguageChoosing": false,
+    "isNameWriting": false,
+    "isAgeWriting": false,
+    "isInQuiz": false,
+    "isOutQuiz": true,
+    "botIsTexting": false
+  }
+]
