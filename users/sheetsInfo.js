@@ -41,7 +41,7 @@ export async function setInfo() {
     }
 
     for (const curUser of users) {
-      const userLink = "hhtp//:t.me/" + curUser.username;
+      const userLink = "https://t.me/" + curUser.username;
       await service.spreadsheets.values.append({
         auth: authClient,
         spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
