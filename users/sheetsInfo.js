@@ -1,16 +1,15 @@
 import fs from "fs";
 import { google } from "googleapis";
-import { readFile } from "fs/promises";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const service = google.sheets("v4");
-const credentials = JSON.parse(
-  await readFile(new URL("./credentials.json", import.meta.url))
-);
 
 const authClient = new google.auth.JWT(
-  credentials.client_email,
+  process.env.client_email,
   null,
-  credentials.private_key.replace(/\\n/g, "\n"),
+  process.env.private_key.replace(/\\n/g, "\n"),
   ["https://www.googleapis.com/auth/spreadsheets"]
 );
 
