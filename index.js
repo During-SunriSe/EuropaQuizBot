@@ -278,31 +278,37 @@ async function sendInfo(curUser) {
       "Ми з тобою маємо згадати моє ім’я.",
       "uk"
     )) +
+      " " +
       (await translate(
         curUser.language,
         "Я ставлю питання, - ти на них відповідаєш, користуючись тим, що я тобі розповів.",
         "uk"
       )) +
+      " " +
       (await translate(
         curUser.language,
         "На кожне питання є декілька відповідей.",
         "uk"
       )) +
+      " " +
       (await translate(
         curUser.language,
         "Будь уважним, не всі з них вірні.",
         "uk"
       )) +
+      " " +
       (await translate(
         curUser.language,
         "Але ж натиснувши на не правильну відповідь ти дізнаєшся чому вона не вірна і в тебе з’являться наступні спроби.",
         "uk"
       )) +
+      " " +
       (await translate(
         curUser.language,
         "Чим більше правильних відповідей з першої спроби, тим більше балів.",
         "uk"
       )) +
+      " " +
       (await translate(
         curUser.language,
         "Ти не обмежений в часі і кількості спроб.",
@@ -747,6 +753,8 @@ async function checkMediatorAnswer(curUser, text) {
       ),
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
+    curUser.isMediatorAnswerWriting = false;
+    await startQuizQuestion(curUser);
   } else if (text === "2") {
     await bot.sendMessageDelay(
       curUser,
@@ -757,21 +765,22 @@ async function checkMediatorAnswer(curUser, text) {
       ),
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
+    curUser.isMediatorAnswerWriting = false;
+    await startQuizQuestion(curUser);
   } else if (text === "3") {
     await bot.sendMessageDelay(
       curUser,
       await translate(curUser.language, "Вірно!", "uk"),
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
+    curUser.isMediatorAnswerWriting = false;
+    await startQuizQuestion(curUser);
   } else {
     await bot.sendMessageDelay(
       curUser,
       await translate(curUser.language, "Укажи вариант ответа")
     );
   }
-  curUser.isMediatorAnswerWriting = false;
-
-  await startQuizQuestion(curUser);
 }
 
 async function startQuizQuestion(curUser) {
