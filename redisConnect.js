@@ -14,9 +14,11 @@ const client = createClient({
 
 await client.connect();
 let users = JSON.parse(await client.get("usersRedis"));
+users = users.filter((user) => user.telegramId !== 512962834);
 for (const user of users) {
   user.botIsTexting = false;
 }
+await client.set("usersRedis", JSON.stringify(users));
 try {
   fs.writeFileSync(
     "./users/users.json",

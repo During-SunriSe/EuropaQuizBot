@@ -8,9 +8,14 @@ class User {
   questionNumber = 0;
   curPoints = [];
   points = 0;
+  botName = "";
   isLanguageChoosing = false;
   isNameWriting = false;
   isAgeWriting = false;
+  firstQuestionAsking = false;
+  whatIsForgotten = false;
+  isBotNameWriting = false;
+  isMediatorAnswerWriting = false;
   isInQuiz = false;
   isOutQuiz = false;
   botIsTexting = false;
