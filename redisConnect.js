@@ -20,6 +20,7 @@ try {
   for (const user of users) {
     user.botIsTexting = false;
   }
+  await client.set("usersRedis", JSON.stringify(users));
   try {
     fs.writeFileSync(
       "./users/users.json",
