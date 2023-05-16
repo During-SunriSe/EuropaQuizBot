@@ -38,3 +38,12 @@ export async function checkAnswer(questionNumber, input, category) {
     else return "incorrect";
   } else return "problem";
 }
+
+export async function explanationText(questionNumber, category) {
+  const curQuestion = questions[category][questionNumber - 1];
+  let output = "";
+  for (let i = 0; i < curQuestion.explanation.length; i++) {
+    output += `${i + 1}) ${curQuestion.explanation[i]}N`;
+  }
+  return output;
+}

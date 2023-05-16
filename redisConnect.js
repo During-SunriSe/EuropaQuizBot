@@ -4,6 +4,8 @@ import { createClient } from "redis";
 
 dotenv.config();
 
+let users = [];
+
 const client = createClient({
   password: process.env.REDISCLOUD_PASSWORD,
   socket: {
@@ -12,25 +14,32 @@ const client = createClient({
   },
 });
 
-await client.connect();
-let users = JSON.parse(await client.get("usersRedis"));
-for (const user of users) {
-  user.botIsTexting = false;
-}
 try {
-  fs.writeFileSync(
-    "./users/users.json",
-    JSON.stringify(users),
-    function (err, file) {
-      if (err) throw err;
-    }
-  );
-} catch (err) {
+  await client.connect();
+  users = JSON.parse(await client.get("usersRedis"));
+  for (const user of users) {
+    user.botIsTexting = false;
+  }
+  try {
+    fs.writeFileSync(
+      "./users/users.json",
+      JSON.stringify(users),
+      function (err, file) {
+        if (err) throw err;
+      }
+    );
+  } catch (err) {
+    console.log(err);
+
+    process.exit(1);
+  }
+  await client.disconnect();
+} catch (e) {
   console.log(err);
+  console.log("Redis problem");
 
   process.exit(1);
 }
-await client.disconnect();
 
 export async function saveUsersRedis() {
   try {

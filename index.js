@@ -9,6 +9,7 @@ import {
 } from "./users/users.js";
 import { translate } from "./translator.js";
 import {
+  explanationText,
   questionText,
   optionsText,
   optsOptions,
@@ -117,6 +118,7 @@ function start() {
 
   bot.on("callback_query", async (msg) => {
     const curUser = await userCheck(msg.from);
+    if (curUser.botIsTexting === true) return;
     let callbackText = "";
     bot.answerCallbackQuery(msg.id, {
       text: callbackText,
@@ -152,6 +154,11 @@ function start() {
         msg.data === `ok${curUser.questionNumber}`
       ) {
         await askQuestion(curUser);
+      } else if (
+        !curUser.isInQuiz &&
+        msg.data === `want${curUser.questionNumber}`
+      ) {
+        await showExplanation(curUser);
       }
     } catch (e) {
       console.log(e);
@@ -164,6 +171,7 @@ async function startScreen(curUser) {
   if (!curUser.language) {
     const opts = {
       reply_markup: JSON.stringify({
+        resize_keyboard: true,
         keyboard: [
           [
             {
@@ -416,6 +424,7 @@ async function firstQuestion(curUser) {
       (await translate(curUser.language, "Представиться)")),
     {
       reply_markup: JSON.stringify({
+        resize_keyboard: true,
         keyboard: [
           [
             {
@@ -722,6 +731,7 @@ async function mediatorsKnow(curUser, know) {
       (await translate(curUser.language, "Обидва варіанти", "uk")),
     {
       reply_markup: JSON.stringify({
+        resize_keyboard: true,
         keyboard: [
           [
             {
@@ -846,6 +856,28 @@ async function startQuiz(curUser) {
   await askQuestion(curUser);
 }
 
+async function showExplanation(curUser) {
+  await bot.sendMessageDelay(
+    curUser,
+    await translate(
+      curUser.language,
+      await explanationText(curUser.questionNumber, curUser.category)
+    ),
+    {
+      reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {
+              text: await translate(curUser.language, "Понятно"),
+              callback_data: `ok${curUser.questionNumber}`,
+            },
+          ],
+        ],
+      }),
+    }
+  );
+}
+
 async function askQuestion(curUser) {
   if (curUser.questionNumber > 2) await endQuiz(curUser);
   else {
@@ -910,6 +942,15 @@ async function sendAnswer(curUser, res) {
       {
         reply_markup: JSON.stringify({
           inline_keyboard: [
+            [
+              {
+                text: await translate(
+                  curUser.language,
+                  "Почему другие неправильны?"
+                ),
+                callback_data: `want${curUser.questionNumber}`,
+              },
+            ],
             [
               {
                 text: await translate(curUser.language, "Понятно"),
