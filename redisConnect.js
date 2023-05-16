@@ -45,7 +45,8 @@ export async function saveUsersRedis() {
   try {
     await client.connect();
 
-    await client.set("usersRedis", JSON.stringify(users));
+    if (users.length !== 0)
+      await client.set("usersRedis", JSON.stringify(users));
 
     await client.disconnect();
   } catch (e) {
