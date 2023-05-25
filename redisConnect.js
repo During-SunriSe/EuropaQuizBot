@@ -60,4 +60,10 @@ export function clearAdmin() {
   });
 }
 
+export function clearAll() {
+  users = users.filter((user) => {
+    return false;
+  });
+}
+
 export { users };

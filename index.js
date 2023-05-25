@@ -16,7 +16,7 @@ import {
   checkAnswer,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
-import { clearAdmin } from "./redisConnect.js";
+import { clearAdmin, clearAll } from "./redisConnect.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -61,6 +61,10 @@ function start() {
     }
     if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
       clearAdmin();
+      return;
+    }
+    if (text === "/clearAll" && curUser.telegramId === ADMIN_ID) {
+      clearAll();
       return;
     }
     try {
