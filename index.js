@@ -422,27 +422,22 @@ async function nameStory2(curUser) {
     curUser,
     "Моя місія зараз – навчити тебе як чути та бути почутим, щоб не втрачати друзів та не псувати стосунків з близькими через конфлікти"
   );
-  await bot.sendMessageDelay(
-    curUser,
-    curUser.language,
-    "Тобі щось відомо про Медіаторів?",
-    {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: "Так",
-              callback_data: "yeah1",
-            },
-            {
-              text: "Ні",
-              callback_data: "no1",
-            },
-          ],
+  await bot.sendMessageDelay(curUser, "Тобі щось відомо про Медіаторів?", {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {
+            text: "Так",
+            callback_data: "yeah1",
+          },
+          {
+            text: "Ні",
+            callback_data: "no1",
+          },
         ],
-      }),
-    }
-  );
+      ],
+    }),
+  });
 }
 
 async function mediatorsKnow(curUser, know) {
