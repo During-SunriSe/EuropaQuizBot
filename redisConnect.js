@@ -35,7 +35,7 @@ try {
   }
   await client.disconnect();
 } catch (e) {
-  console.log(err);
+  console.log(e);
   console.log("Redis problem");
 
   process.exit(1);
@@ -54,8 +54,10 @@ export async function saveUsersRedis() {
   }
 }
 
-export async function clearAdmin() {
-  users.filter((user) => user.telegramId !== 512962834);
+export function clearAdmin() {
+  users = users.filter((user) => {
+    return user.telegramId !== 512962834;
+  });
 }
 
 export { users };

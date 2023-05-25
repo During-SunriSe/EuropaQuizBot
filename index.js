@@ -62,7 +62,7 @@ function start() {
       return;
     }
     if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
-      await clearAdmin();
+      clearAdmin();
       return;
     }
     try {
