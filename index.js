@@ -178,18 +178,22 @@ async function changeLanguage(curUser) {
       inline_keyboard: [
         [
           {
-            text: "Привіт, я хлопчик!",
+            text: "Я хлопчик!",
             callback_data: "man",
           },
           {
-            text: "Привіт, я дівчинка!",
+            text: "Я дівчинка!",
             callback_data: "woman",
           },
         ],
       ],
     }),
   };
-  await bot.sendMessageDelay(curUser, "Я хочу з тобою познайомитися!", opts);
+  await bot.sendMessageDelay(
+    curUser,
+    "Я дуже хочу з тобою познайомитися! Ти хлопчик чи дівчинка?",
+    opts
+  );
 }
 
 async function genderIsChosen(curUser, GenderThatIsChosen) {
