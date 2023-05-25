@@ -4,7 +4,6 @@ import {
   checkName,
   checkAge,
   checkCategory,
-  saveUsers,
   getJSON,
 } from "./users/users.js";
 import { translate } from "./translator.js";
@@ -33,12 +32,8 @@ process.on("uncaughtException", async (error, source) => {
 });
 
 bot.setMyCommands([
-  { command: "/restart", description: await translate("uk", "Начать заново") },
-  { command: "/info", description: await translate("uk", "Информация") },
-  {
-    command: "/language",
-    description: await translate("uk", "Изменение языка"),
-  },
+  { command: "/restart", description: "Почати знову" },
+  { command: "/info", description: "Правила" },
 ]);
 
 function start() {
@@ -50,10 +45,7 @@ function start() {
 
     if (curUser.botIsTexting === true) return;
     if (!text) {
-      await bot.sendMessageDelay(
-        curUser,
-        await translate(curUser.language, "Прости, я тебя не понимаю")
-      );
+      await bot.sendMessageDelay(curUser, "Пробач, я тебе не розумію");
       return;
     }
 
@@ -72,26 +64,18 @@ function start() {
         await restartQuiz(curUser);
       } else if (text === "/info") {
         await sendInfo(curUser);
-      } else if (text === "/language") {
-        await changeLanguage(curUser);
       } else if (curUser.isAgeWriting) {
         await lookAtAge(curUser, text);
       } else if (curUser.isNameWriting) {
         await lookAtName(curUser, text);
-      } else if (curUser.isBotNameWriting) {
-        await botNameAdd(curUser, text);
       } else if (curUser.isMediatorAnswerWriting) {
         await checkMediatorAnswer(curUser, text);
       } else if (curUser.whatIsForgotten) {
         await checkFirstAnswer(curUser, text);
       } else if (curUser.isLanguageChoosing) {
-        await bot.sendMessageDelay(
-          curUser,
-          await translate(
-            curUser.language ? curUser.language : "uk",
-            "Сначала выбери, пожалуйста, язык 🙃"
-          )
-        );
+        await bot.sendMessageDelay(curUser, "Обери відповідь, будь ласка 🙃", {
+          reply_markup: JSON.stringify({ hide_keyboard: true }),
+        });
       } else if (curUser.isInQuiz) {
         const res = await checkAnswer(
           curUser.questionNumber,
@@ -106,10 +90,7 @@ function start() {
       } else
         await bot.sendMessageDelay(
           curUser,
-          await translate(
-            curUser.language,
-            "Чтобы продолжить, ознакомься с текстом и нажми на кнопку под ним)"
-          )
+          "Щоб продовжити, ознайомся з текстом та нажми на кнопку під ним 😉"
         );
     } catch (e) {
       console.log(e);
@@ -131,8 +112,8 @@ function start() {
     });
     try {
       if (curUser.isLanguageChoosing) {
-        if (msg.data === "uk" || msg.data === "ru") {
-          await languageIsChanged(curUser, msg.data);
+        if (msg.data === "man" || msg.data === "woman") {
+          await genderIsChosen(curUser, msg.data);
         }
       } else if (curUser.isNameWriting) {
         if (msg.data === "yes") {
@@ -142,9 +123,7 @@ function start() {
         }
       } else if (curUser.firstQuestionAsking) {
         if (msg.data === "yeah") {
-          await botName(curUser, true);
-        } else if (msg.data === "no") {
-          await botName(curUser, false);
+          await nameStory2(curUser);
         } else if (msg.data === "yeah1") {
           await mediatorsKnow(curUser, true);
         } else if (msg.data === "no1") {
@@ -189,145 +168,63 @@ async function startScreen(curUser) {
     };
     await bot.sendMessageDelay(curUser, "Привіт!", opts);
   } else
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Чтобы начать заново нажми /restart")
-    );
+    await bot.sendMessageDelay(curUser, "Щоб почати знову, натисни /restart");
 }
 
 async function changeLanguage(curUser) {
   curUser.isLanguageChoosing = true;
-  await bot.sendMessageDelay(
-    curUser,
-    await translate("uk", "Я хочу с тобой познакомиться!"),
-    { reply_markup: JSON.stringify({ hide_keyboard: true }) }
-  );
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
         [
           {
-            text: curUser.language === "ru" ? "Русский" : "Росiйська",
-            callback_data: "ru",
+            text: "Привіт, я хлопчик!",
+            callback_data: "man",
           },
           {
-            text: curUser.language === "ru" ? "Украинский" : "Українська",
-            callback_data: "uk",
+            text: "Привіт, я дівчинка!",
+            callback_data: "woman",
           },
         ],
       ],
     }),
   };
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(
-      curUser.language ? curUser.language : "uk",
-      "Выбери язык, на котором тебе удобнее общаться"
-    ),
-    opts
-  );
+  await bot.sendMessageDelay(curUser, "Я хочу з тобою познайомитися!", opts);
 }
 
-async function languageIsChanged(curUser, languageThatIsChosen) {
-  await bot.setMyCommands([
-    {
-      command: "/restart",
-      description: await translate(languageThatIsChosen, "Начать заново"),
-    },
-    {
-      command: "/info",
-      description: await translate(languageThatIsChosen, "Информация"),
-    },
-    {
-      command: "/language",
-      description: await translate(languageThatIsChosen, "Изменение языка"),
-    },
-  ]);
-
+async function genderIsChosen(curUser, GenderThatIsChosen) {
   curUser.isLanguageChoosing = false;
 
-  if (!curUser.language) {
-    curUser.language = languageThatIsChosen;
+  await addName(curUser);
 
-    await addName(curUser);
-  } else {
-    await bot.sendMessageDelay(
-      curUser,
-      languageThatIsChosen === "ru"
-        ? "Язык изменен на русский."
-        : "Мову змінено на українську."
-    );
-  }
-  curUser.language = languageThatIsChosen;
+  curUser.gender = GenderThatIsChosen;
+  curUser.language = "uk";
 }
 
 async function addName(curUser, rewrite = false) {
   curUser.isNameWriting = true;
   if (rewrite) {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Хорошо, как тебя зовут?")
-    );
+    await bot.sendMessageDelay(curUser, "Добре, напиши ще раз 😌");
   } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(
-        curUser.language,
-        "Отлично, как тебя зовут или как я могу к тебе обращаться?"
-      )
-    );
+    await bot.sendMessageDelay(curUser, "Супер, а як тебе звати?");
   }
 }
 
 async function sendInfo(curUser) {
+  await bot.sendMessageDelay(curUser, "Якщо коротко, то правила наступні:");
   await bot.sendMessageDelay(
     curUser,
-    await translate(curUser.language, "Правила квесту прості:", "uk")
+    "•	Перше завдання - ми з тобою маємо згадати моє ім’я."
   );
   await bot.sendMessageDelay(
     curUser,
-    (await translate(
-      curUser.language,
-      "Ми з тобою маємо згадати моє ім’я.",
-      "uk"
-    )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Я ставлю питання, - ти на них відповідаєш, користуючись тим, що я тобі розповів.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "На кожне питання є декілька відповідей.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Будь уважним, не всі з них вірні.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Але ж натиснувши на не правильну відповідь ти дізнаєшся чому вона не вірна і в тебе з’являться наступні спроби.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Чим більше правильних відповідей з першої спроби, тим більше балів.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Ти не обмежений в часі і кількості спроб.",
-        "uk"
-      ))
+    "•	Друге завдання - я ставлю питання, і ти на них відповідаєш. За кожну вірну відповідь тобі нараховуються бали. На кожне питання є декілька відповідей. Будь уважним, не всі з них вірні. Чим більше правильних відповідей з першої спроби, тим більше балів. Ти не обмежений в часі і кількості спроб."
   );
+  await bot.sendMessageDelay(
+    curUser,
+    "•	Останнє завдання – творче, про нього в кінці гри."
+  );
+  await bot.sendMessageDelay(curUser, "Більша детальна інформація тут:");
 }
 
 async function lookAtName(curUser, text) {
@@ -335,10 +232,7 @@ async function lookAtName(curUser, text) {
   if (res === "long") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Пожалуйста, напиши свое имя одним словом 🙂"
-      )
+      "Будь ласка, напиши свое им'я одним словом 🙂"
     );
   } else {
     const opts = {
@@ -346,13 +240,13 @@ async function lookAtName(curUser, text) {
         inline_keyboard: [
           [
             {
-              text: await translate(curUser.language, "Да"),
+              text: "Так",
               callback_data: "yes",
             },
           ],
           [
             {
-              text: await translate(curUser.language, "Изменить"),
+              text: "Змінити",
               callback_data: "change",
             },
           ],
@@ -362,7 +256,7 @@ async function lookAtName(curUser, text) {
     curUser.name = res;
     await bot.sendMessageDelay(
       curUser,
-      await translate(curUser.language, `Тебя зовут ${res}, правильно?`),
+      `${res}, так? Перевір, будь ласка, чи ти правильно написав ім'я 😊`,
       opts
     );
   }
@@ -372,37 +266,22 @@ async function nameApprove(curUser) {
   curUser.isNameWriting = false;
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      `Супер, приятно познакомиться ${curUser.name}`
-    )
+    `Супер, приємно познайомитися ${curUser.name}!`
   );
   await askForAge(curUser);
 }
 
 async function askForAge(curUser) {
   curUser.isAgeWriting = true;
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, `А сколько тебе лет?🙃`)
-  );
+  await bot.sendMessageDelay(curUser, `А скільки тобі років? 🙃`);
 }
 
 async function lookAtAge(curUser, text) {
   let res = await checkAge(text);
   if (!res) {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(
-        curUser.language,
-        "Пожалуйста, напиши свой реальный возраст цифрами🙂"
-      )
-    );
+    await bot.sendMessageDelay(curUser, "Напиши цифрами свій реальний вік 🙂");
   } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, `Спасибо!`)
-    );
+    await bot.sendMessageDelay(curUser, `Дякую!`);
     curUser.age = res;
     curUser.isAgeWriting = false;
     await checkCategory(curUser);
@@ -416,17 +295,7 @@ async function firstQuestion(curUser) {
   curUser.whatIsForgotten = true;
   bot.sendMessageDelay(
     curUser,
-    (await translate(
-      curUser.language,
-      "Ой, мені здається, я щось забув) NПеревіримо твою уважність, вона нам знадобиться:NN1.",
-      "uk"
-    )) +
-      " " +
-      (await translate(curUser.language, "Поздороваться N2.")) +
-      " " +
-      (await translate(curUser.language, "Поскаржитись на життяN3.", "uk")) +
-      " " +
-      (await translate(curUser.language, "Представиться)")),
+    "Ой, мені здається, я щось забув зробити... Як гадаєш, що саме?\n\n1. Привітатися 👋\n2. Поскаржитись на життя 🥲\n3. Назвати своє ім'я 🤔",
     {
       reply_markup: JSON.stringify({
         resize_keyboard: true,
@@ -446,99 +315,55 @@ async function firstQuestion(curUser) {
 
 async function checkFirstAnswer(curUser, text) {
   if (text === "1") {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Здається привітався🙄", "uk")
-    );
+    await bot.sendMessageDelay(curUser, "Ні, здається привітався🙄");
   } else if (text === "2") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "А ти з гумором) мені це подобається!",
-        "uk"
-      )
+      "А ти з гумором 😂 мені це подобається! Ні скаржитися не хотів 😌"
     );
   } else if (text === "3") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Так, ти правий, як я міг про це забути🤔",
-        "uk"
-      ),
+      "Так, ти правий, як я міг про це забути 😮 Дякую, що нагадав!",
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
 
     curUser.whatIsForgotten = false;
     await nameStory(curUser);
   } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Укажи вариант ответа")
-    );
+    await bot.sendMessageDelay(curUser, "Вкажи варіант відповіді");
   }
 }
 
 async function nameStory(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Мене звати… упс… я , здається, не пам’ятаю…",
-      "uk"
-    )
+
+    "Мене звати… упс… 😐 я , здається, не пам’ятаю…"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Сумно… щось трапилось, це мабуть пов’язано з тим, що мене було переміщено з чудової країни до тебе і по дорозі мені забули записати ім’я))",
-      "uk"
-    )
+
+    "Здається, трапився якийсь глюк під час моєї телепортації  до тебе з чарівної планети. Ніяк не можу пригадати своє ім’я. Сподіваюсь, що це тимчасово 🤔"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Я дуже хочу з тобою познайомитись, але як же це зробити, я не пам’ятаю як мене звати😔",
-      "uk"
-    )
+    "Знаєш, якщо ти хочеш мати приємне спілкування з іншою людиною, важливо знати його ім’я та звертатися по імені. Один мудрець сказав, що ім’я -— найсолодший і найважливіший для людини звук будь-якою мовою"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(curUser.language, "Ну що ж… Почнемо квест!", "uk")
+    "Доречі цікавий факт! Твоє право на ім’я є у тебе з народження та ніхто не може його порушувати"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(curUser.language, "В мене до тебе є перша справа)", "uk")
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, "Допоможи мені згадати моє ім’я🥺", "uk")
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(
-      curUser.language,
-      "Я розповім тобі те що пам’ятаю та може ми з тобою разом згадаємо моє ім’я😌",
-      "uk"
-    )
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, "Сподіваюсь, що ти згоден?😅", "uk"),
+    "Бачу ти вже готовий рухатися далі, так?😉",
     {
       reply_markup: JSON.stringify({
         inline_keyboard: [
           [
             {
-              text: await translate(curUser.language, "Да"),
+              text: "Так!",
               callback_data: "yeah",
-            },
-            {
-              text: await translate(curUser.language, "Нет"),
-              callback_data: "no",
             },
           ],
         ],
@@ -547,147 +372,66 @@ async function nameStory(curUser) {
   );
 }
 
-async function botName(curUser, agree) {
-  if (agree) {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(
-        curUser.language,
-        "Супер, тоді почнемо, але ж спочатку, попрошу тебе придумати мені тимчасове ім’я, щоб нам було зручно спілкуватись🙃",
-        "uk"
-      ),
-      { reply_markup: JSON.stringify({ hide_keyboard: true }) }
-    );
-  } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(
-        curUser.language,
-        "Так, ти правий, мені теж здається це буде не зручно, тож поки що попрошу тебе придумати мені тимчасове ім’я, щоб нам було зручно спілкуватись🙃",
-        "uk"
-      ),
-      { reply_markup: JSON.stringify({ hide_keyboard: true }) }
-    );
-  }
-  curUser.isBotNameWriting = true;
-}
-
-async function botNameAdd(curUser, text) {
-  curUser.botName = text;
-  curUser.isBotNameWriting = false;
+async function nameStory2(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Чудово, тепер ти можеш до мене звертатись саме так ☺️",
-      "uk"
-    )
+    "Супер, тоді перше завдання тобі - допоможи мені згадати моє ім'я 😅",
+    { reply_markup: JSON.stringify({ hide_keyboard: true }) }
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "То я тобі обіцяв розповісти про себе, слухай)",
-      "uk"
-    )
+    "Для цього я розповім тобі більше про себе"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Я, прибув з чудової планети ________ ",
-      "uk"
-    )
+    "Я, прибув з чудової планети, розмовляють один з одним голосом, а чують вухами."
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Мешканці нашої планети розмовляють один з одним голосом , а чують вухами.",
-      "uk"
-    )
+    "Відчуваю твоє здивування…, адже здається, що і на Землі люди спілкуються так само 😆"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Ой, ти зараз запитаєш, що це я таке кажу… начебто у вас не так)",
-      "uk"
-    )
+    "Так то воно так 😁 але ж казати і чути можна по-різному"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Так то воно так)) але ж казати і чути можна по різному",
-      "uk"
-    )
+    "Словом можна образити, а на образу виникне злість і якщо не почути один одного то буде сварка чи ще гірше бійка. 🫣 Тобі знайомі такі конфліктні ситуації?"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Словом можна образити, а на образу виникне злість і якщо не почути один одного то буде сварка чи ще гірше бійка 🫣NТобі знайомі такі приклади?",
-      "uk"
-    )
+    "На нашій планеті ні сварок ні бійок, тому що, всіх змалку навчають, що конфлікти це не погано, іноді навіть добре, але ж коли  вони виникають то вирішувати їх треба шляхом перемовин."
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "На нашій планеті ні сварок ні бійок, тому що, всіх змалку навчають, що конфлікти це не погано, іноді навіть добре, але ж коли  вони виникають то вирішувати їх треба шляхом перемовин.",
-      "uk"
-    )
+    "В нас є такі чарівники, які називаються – МЕДІАТОРИ."
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "В нас є такі чарівники, які називаються – МЕДІАТОРИ.",
-      "uk"
-    )
+    "Саме вони допомагають сторонам конфлікту правильно використовувати голос, слова та вуха 😌 Далі я тобі поясню детальніше про цю магію 😄"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Саме вони покликанні допомогти використовувати голос і вуха) трошки пізніше я тобі поясню, про що тут я наговорив😄",
-      "uk"
-    )
+    "Я теж є медіатором з надзвичайно важливою місією – мандрую по різних планетах й світах та ділюся досвідом, знаннями та навичками 😁"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(curUser.language, "Одним з них є я 😁", "uk")
+    "Моя місія зараз – навчити тебе як чути та бути почутим, щоб не втрачати друзів та не псувати стосунків з близькими через конфлікти"
   );
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "І от коли ми зрозуміли, що цей чарівний спосіб позбавив нашу планету негативу, сварок і бійок вже на сто років, так, ми саме відсвяткували цю подію, ми вирішили поділитись ним з іншими.",
-      "uk"
-    )
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(
-      curUser.language,
-      "Саме мене направили до тебе з місією – навчити тебе розумітися на конфліктах, вміло розв’язувати їх і опановувати нові знання.",
-      "uk"
-    )
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, "Тобі щось відомо про Медіаторів?", "uk"),
+    curUser.language,
+    "Тобі щось відомо про Медіаторів?",
     {
       reply_markup: JSON.stringify({
         inline_keyboard: [
           [
             {
-              text: await translate(curUser.language, "Да"),
+              text: "Так",
               callback_data: "yeah1",
             },
             {
-              text: await translate(curUser.language, "Нет"),
+              text: "Ні",
               callback_data: "no1",
             },
           ],
@@ -701,39 +445,19 @@ async function mediatorsKnow(curUser, know) {
   if (know) {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "О, чудово, ти не тільки з гумором, а ще й обізнаний!",
-        "uk"
-      )
+
+      "О, чудово. Радує твоя обізнаність, але дозволь я розповім тобі ще більше!"
     );
   } else {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Нічого страшного, багато хто не знає, я тобі розповім 😌NNДоречі, на нашій планеті 100 років тому, теж ніхто про неї не знав, але одного разу до нас прилетів схожий на мене чарівник і навчив нас",
-        "uk"
-      )
+
+      "Нічого страшного - багато хто не знає. Я тут для того, щоб це виправити. На нашій планеті багато століть тому, теж ніхто про них не знав. Одного разу до нас прилетів схожий на мене чарівник та поділився досвідом й знаннями"
     );
   }
   await bot.sendMessageDelay(
     curUser,
-    (await translate(curUser.language, "Як думаєш Медіатор цеN1.", "uk")) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Прилад для гри на гітарі N2.",
-        "uk"
-      )) +
-      " " +
-      (await translate(
-        curUser.language,
-        "Особа – яка проводить медіаціюN3.",
-        "uk"
-      )) +
-      " " +
-      (await translate(curUser.language, "Обидва варіанти", "uk")),
+    "Як думаєш Медіатор це \n\n1. Прилад для гри на гітарі \n2. Особа, яка проводить медіацію \n3.Обидва варіанти",
     {
       reply_markup: JSON.stringify({
         resize_keyboard: true,
@@ -761,11 +485,9 @@ async function checkMediatorAnswer(curUser, text) {
   if (text === "1") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Так, є таке, Медіатор (він же плектр) являє собою невеликий плоский виріб з пружного, міцного матеріалу з загостреним кутом, використовується для гри на гітарі",
-        "uk"
-      ),
+
+      "Так, є таке, такий медіатор – це невеликий плоский пристрій для гри на гітарі та деяких інших струнних інструментах. Але не про нього ми будемо з тобою спілкуватися. Обери інший варіант відповіді",
+
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
     curUser.isMediatorAnswerWriting = false;
@@ -773,11 +495,9 @@ async function checkMediatorAnswer(curUser, text) {
   } else if (text === "2") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Так, і саме про нього ми будемо спілкуватись з тобою!",
-        "uk"
-      ),
+
+      "Так, і саме про нього ми будемо спілкуватись з тобою! Хоча ти маєш знати, що медіатором також є невеликий плоский пристрій, що використовується для гри на гітарі та деяких інших струнних інструментах",
+
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
     curUser.isMediatorAnswerWriting = false;
@@ -785,37 +505,30 @@ async function checkMediatorAnswer(curUser, text) {
   } else if (text === "3") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(curUser.language, "Вірно!", "uk"),
+      "Вірно! Є медіатор, який використовується для гри на гітарі, але ми будемо спілкуватися про Медіатора, який проводить медіацію",
       { reply_markup: JSON.stringify({ hide_keyboard: true }) }
     );
     curUser.isMediatorAnswerWriting = false;
     await startQuizQuestion(curUser);
   } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Укажи вариант ответа")
-    );
+    await bot.sendMessageDelay(curUser, "Вкажи варіант відповіді");
   }
 }
 
 async function startQuizQuestion(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Мені здається, що ми можемо починати заробляти тобі бали, згоден?",
-      "uk"
-    ),
+    "Мені здається, що ми можемо починати заробляти тобі бали, згоден?",
     {
       reply_markup: JSON.stringify({
         inline_keyboard: [
           [
             {
-              text: await translate(curUser.language, "Да"),
+              text: "Так",
               callback_data: "yeah2",
             },
             {
-              text: await translate(curUser.language, "Нет"),
+              text: "Ні",
               callback_data: "no2",
             },
           ],
@@ -830,20 +543,14 @@ async function startQuizAnswer(curUser, agree) {
   if (agree) {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Супер! Але, дозволь я тобі спочатку розповім про правила",
-        "uk"
-      )
+
+      "Супер! Але, дозволь я тобі спочатку розповім про правила. Вони тут ____"
     );
   } else {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Згоден, спочатку про правила, бо правила важлива річ",
-        "uk"
-      )
+
+      "Згоден, спочатку про правила, бо правила важлива річ, вони тут ____"
     );
   }
   await sendInfo(curUser);
@@ -853,10 +560,7 @@ async function startQuizAnswer(curUser, agree) {
 async function startQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Ну что, поехали!NN(Ответы сейчас 1, 3, 2)"
-    )
+    "Супер, ти молодець! Приємно з тобою мати справу ☺\n\nНу що, почнемо (Ответы сейчас 1, 3, 2)"
   );
   await askQuestion(curUser);
 }
@@ -864,16 +568,14 @@ async function startQuiz(curUser) {
 async function showExplanation(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      await explanationText(curUser.questionNumber, curUser.category)
-    ),
+
+    await explanationText(curUser.questionNumber, curUser.category),
     {
       reply_markup: JSON.stringify({
         inline_keyboard: [
           [
             {
-              text: await translate(curUser.language, "Понятно"),
+              text: "Зрозуміло",
               callback_data: `ok${curUser.questionNumber}`,
             },
           ],
@@ -889,17 +591,13 @@ async function askQuestion(curUser) {
     curUser.isInQuiz = true;
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        await questionText(curUser.questionNumber, curUser.category)
-      )
+
+      await questionText(curUser.questionNumber, curUser.category)
     );
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        await optionsText(curUser, curUser.category)
-      ),
+
+      await optionsText(curUser, curUser.category),
       {
         reply_markup: JSON.stringify({
           keyboard: [
@@ -914,58 +612,42 @@ async function askQuestion(curUser) {
 
 async function sendAnswer(curUser, res) {
   if (res === "problem") {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Укажи вариант ответа")
-    );
+    await bot.sendMessageDelay(curUser, "Вкажи варіант відповіді");
   } else if (res === "incorrect") {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Попробуй еще раз N*Возможно комментарий к неправильному ответу*"
-      )
+
+      "Спробуй ще раз N*Возможно комментарий к неправильному ответу*"
     );
     if (!curUser.isOutQuiz) {
       if (curUser.curPoints[curUser.curPoints.length - 1] > 0)
         curUser.curPoints[curUser.curPoints.length - 1]--;
     }
   } else {
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Молодец!"),
-      {
-        reply_markup: JSON.stringify({
-          hide_keyboard: true,
-        }),
-      }
-    );
+    await bot.sendMessageDelay(curUser, "Молодець!", {
+      reply_markup: JSON.stringify({
+        hide_keyboard: true,
+      }),
+    });
     curUser.questionNumber++;
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "*Комментарий к правильному ответу*"),
-      {
-        reply_markup: JSON.stringify({
-          inline_keyboard: [
-            [
-              {
-                text: await translate(
-                  curUser.language,
-                  "Почему другие неправильны?"
-                ),
-                callback_data: `want${curUser.questionNumber}`,
-              },
-            ],
-            [
-              {
-                text: await translate(curUser.language, "Понятно"),
-                callback_data: `ok${curUser.questionNumber}`,
-              },
-            ],
+    await bot.sendMessageDelay(curUser, "*Комментарий к правильному ответу*", {
+      reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {
+              text: "Почему другие неправильны?",
+              callback_data: `want${curUser.questionNumber}`,
+            },
           ],
-        }),
-      }
-    );
+          [
+            {
+              text: "Понятно",
+              callback_data: `ok${curUser.questionNumber}`,
+            },
+          ],
+        ],
+      }),
+    });
     curUser.isInQuiz = false;
   }
 }
@@ -973,10 +655,8 @@ async function sendAnswer(curUser, res) {
 async function endQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    await translate(
-      curUser.language,
-      "Поздравляю с завершением квиза!NN*Прощальный текст*"
-    ),
+
+    "Поздравляю с завершением квиза!NN*Прощальный текст*",
     {
       reply_markup: JSON.stringify({
         hide_keyboard: true,
@@ -985,17 +665,12 @@ async function endQuiz(curUser) {
   );
   if (!curUser.isOutQuiz) {
     curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, `Результат: ${curUser.points}`)
-    );
+    await bot.sendMessageDelay(curUser, `Результат: ${curUser.points}`);
   } else {
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        `Напоминаю, что как результат учитывается только первое прохождение)`
-      )
+
+      `Напоминаю, что как результат учитывается только первое прохождение)`
     );
   }
   curUser.questionNumber = 0;
@@ -1006,16 +681,12 @@ async function endQuiz(curUser) {
 async function save() {
   setTimeout(async () => {
     await save();
-    await saveUsers();
     setTimeout(async () => await setInfo(), 1000 * 60 * 2);
   }, 1000 * 60 * 3);
 }
 
 async function endMenu(curUser) {
-  await bot.sendMessageDelay(
-    curUser,
-    await translate(curUser.language, "Спасибо за прохождение квиза!")
-  );
+  await bot.sendMessageDelay(curUser, "Спасибо за прохождение квиза!");
 }
 
 async function timeout(curUser, ms) {
@@ -1038,22 +709,16 @@ async function restartQuiz(curUser) {
   if (!curUser.points)
     await bot.sendMessageDelay(
       curUser,
-      await translate(
-        curUser.language,
-        "Чтобы перезапустить квиз, тебе нужно пройти его хотя бы один раз"
-      )
+
+      "Чтобы перезапустить квиз, тебе нужно пройти его хотя бы один раз"
     );
   else {
     curUser.questionNumber = 0;
-    await bot.sendMessageDelay(
-      curUser,
-      await translate(curUser.language, "Квиз начат заново"),
-      {
-        reply_markup: JSON.stringify({
-          hide_keyboard: true,
-        }),
-      }
-    );
+    await bot.sendMessageDelay(curUser, "Квиз начат заново", {
+      reply_markup: JSON.stringify({
+        hide_keyboard: true,
+      }),
+    });
     await askQuestion(curUser);
   }
 }
