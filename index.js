@@ -5,6 +5,7 @@ import {
   checkAge,
   checkCategory,
   getJSON,
+  saveUsers,
 } from "./users/users.js";
 import { translate } from "./translator.js";
 import {
@@ -72,7 +73,7 @@ function start() {
         await checkMediatorAnswer(curUser, text);
       } else if (curUser.whatIsForgotten) {
         await checkFirstAnswer(curUser, text);
-      } else if (curUser.isLanguageChoosing) {
+      } else if (curUser.isGenderChoosing) {
         await bot.sendMessageDelay(curUser, "Обери відповідь, будь ласка 🙃", {
           reply_markup: JSON.stringify({ hide_keyboard: true }),
         });
@@ -85,8 +86,8 @@ function start() {
         await sendAnswer(curUser, res);
       } else if (curUser.isOutQuiz && curUser.questionNumber === 0) {
         await endMenu(curUser);
-      } else if (!curUser.language) {
-        await changeLanguage(curUser);
+      } else if (!curUser.gender) {
+        await chooseGender(curUser);
       } else
         await bot.sendMessageDelay(
           curUser,
@@ -111,7 +112,7 @@ function start() {
       show_alert: true,
     });
     try {
-      if (curUser.isLanguageChoosing) {
+      if (curUser.isGenderChoosing) {
         if (msg.data === "man" || msg.data === "woman") {
           await genderIsChosen(curUser, msg.data);
         }
@@ -152,7 +153,7 @@ function start() {
 }
 
 async function startScreen(curUser) {
-  if (!curUser.language) {
+  if (!curUser.gender) {
     const opts = {
       reply_markup: JSON.stringify({
         resize_keyboard: true,
@@ -166,13 +167,33 @@ async function startScreen(curUser) {
         ],
       }),
     };
-    await bot.sendMessageDelay(curUser, "Привіт!", opts);
+    await bot.sendMessage(
+      curUser.telegramId,
+      `Раді вітати у грі-квесті «ЧАРІВНИЙ СВІТ МЕДІАЦІЇ»!
+      \nПропонуємо перевірити, що ти знаєш про конфлікти, як їх вирішувати і як себе в них поводити. Також запрошуємо тебе доторкнутися до чарівного світу медіації за допомогою медіатора-мандрівника, який прибув з дружньої планети. Він буде давати тобі завдання та ставити запитання. Будь уважним, на кожне питання є декілька відповідей і лише одне з них буде вірним. Правильні відповіді на запитання будуть магічно перетворюватися на бали. Також в тебе є можливість отримати бали за виконання додаткових творчих завдань.
+      \nТільки не засмучуйся, якщо вірна відповідь не підкориться тобі з першого разу – це можливість дізнатися нову та корисну інформацію. Пробуй різні варіанти, читай пояснення та знаходь вірну відповідь як справжній дослідник. В тебе завжди є можливість дізнатися чому інші відповіді не є вірними - для цього просто на них натисни. 
+      \nТи можеш проходити гру у зручний час, робити перерви та продовжувати з того місця де зупинився. Все твоє спілкування з медіатором-мандрівником буде збережено та ти зможеш переглядати його час від часу. 
+      \nКожного місяця визначатимуться п’ять переможців, які першими наберуть найбільшу кількість балів. 
+      \nБільше інформації про гру та призи можна знайти тут.
+      \nТи готовий розпочати? 
+      `,
+      opts
+    );
   } else
     await bot.sendMessageDelay(curUser, "Щоб почати знову, натисни /restart");
 }
 
-async function changeLanguage(curUser) {
-  curUser.isLanguageChoosing = true;
+async function chooseGender(curUser) {
+  curUser.isGenderChoosing = true;
+  await bot.sendMessageDelay(
+    curUser,
+    "Привіт! Я дуже хочу з тобою познайомитися!",
+    {
+      reply_markup: JSON.stringify({
+        hide_keyboard: true,
+      }),
+    }
+  );
   const opts = {
     reply_markup: JSON.stringify({
       inline_keyboard: [
@@ -189,20 +210,15 @@ async function changeLanguage(curUser) {
       ],
     }),
   };
-  await bot.sendMessageDelay(
-    curUser,
-    "Я дуже хочу з тобою познайомитися! Ти хлопчик чи дівчинка?",
-    opts
-  );
+  await bot.sendMessageDelay(curUser, "Ти хлопчик чи дівчинка?", opts);
 }
 
 async function genderIsChosen(curUser, GenderThatIsChosen) {
-  curUser.isLanguageChoosing = false;
+  curUser.isGenderChoosing = false;
 
   await addName(curUser);
 
   curUser.gender = GenderThatIsChosen;
-  curUser.language = "uk";
 }
 
 async function addName(curUser, rewrite = false) {
@@ -680,6 +696,7 @@ async function endQuiz(curUser) {
 async function save() {
   setTimeout(async () => {
     await save();
+    await saveUsers();
     setTimeout(async () => await setInfo(), 1000 * 60 * 2);
   }, 1000 * 60 * 3);
 }
@@ -708,12 +725,11 @@ async function restartQuiz(curUser) {
   if (!curUser.points)
     await bot.sendMessageDelay(
       curUser,
-
-      "Чтобы перезапустить квиз, тебе нужно пройти его хотя бы один раз"
+      "Щоб перезапустит квіз, його треба пройти хоча б один раз"
     );
   else {
     curUser.questionNumber = 0;
-    await bot.sendMessageDelay(curUser, "Квиз начат заново", {
+    await bot.sendMessageDelay(curUser, "Квиз розпочато знову", {
       reply_markup: JSON.stringify({
         hide_keyboard: true,
       }),

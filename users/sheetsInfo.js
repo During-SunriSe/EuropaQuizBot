@@ -52,6 +52,7 @@ export async function setInfo() {
               curUser.telegramId,
               userLink,
               curUser.name,
+              curUser.gender === "man" ? "хлопчик" : "дівчинка",
               curUser.age,
               curUser.category,
               ...curUser.curPoints,
