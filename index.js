@@ -227,11 +227,10 @@ async function chooseGender(curUser) {
 }
 
 async function genderIsChosen(curUser, GenderThatIsChosen) {
+  curUser.gender = GenderThatIsChosen;
   curUser.isGenderChoosing = false;
 
   await addName(curUser);
-
-  curUser.gender = GenderThatIsChosen;
 }
 
 async function addName(curUser, rewrite = false) {
@@ -557,13 +556,11 @@ async function startQuizAnswer(curUser, agree) {
   if (agree) {
     await bot.sendMessageDelay(
       curUser,
-
       "Супер! Але, дозволь я тобі спочатку розповім про правила. Вони тут ____"
     );
   } else {
     await bot.sendMessageDelay(
       curUser,
-
       "Згоден, спочатку про правила, бо правила важлива річ, вони тут ____"
     );
   }
