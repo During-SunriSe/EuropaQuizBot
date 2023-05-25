@@ -631,7 +631,7 @@ async function sendAnswer(curUser, res) {
     await bot.sendMessageDelay(
       curUser,
 
-      "Спробуй ще раз N*Возможно комментарий к неправильному ответу*"
+      "Спробуй ще раз \n*Возможно комментарий к неправильному ответу*"
     );
     if (!curUser.isOutQuiz) {
       if (curUser.curPoints[curUser.curPoints.length - 1] > 0)
@@ -670,7 +670,7 @@ async function endQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
 
-    "Поздравляю с завершением квиза!NN*Прощальный текст*",
+    "Поздравляю с завершением квиза! \n\n*Прощальный текст*",
     {
       reply_markup: JSON.stringify({
         hide_keyboard: true,

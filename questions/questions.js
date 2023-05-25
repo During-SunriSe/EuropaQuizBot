@@ -13,9 +13,9 @@ export async function optionsText(curUser, category) {
   let output = "";
   if (!curUser.isOutQuiz) curUser.curPoints.push(curQuestion.options.length);
   for (let i = 0; i < curQuestion.options.length; i++) {
-    output += `${i + 1}) ${curQuestion.options[i]}N`;
+    output += `${i + 1}) ${curQuestion.options[i]}\n`;
   }
-  output += "NКакой ответ выберешь?";
+  output += "\nКакой ответ выберешь?";
   return output;
 }
 
@@ -43,7 +43,7 @@ export async function explanationText(questionNumber, category) {
   const curQuestion = questions[category][questionNumber - 1];
   let output = "";
   for (let i = 0; i < curQuestion.explanation.length; i++) {
-    output += `${i + 1}) ${curQuestion.explanation[i]}N`;
+    output += `${i + 1}) ${curQuestion.explanation[i]}\n`;
   }
   return output;
 }
