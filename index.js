@@ -16,6 +16,7 @@ import {
   checkAnswer,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
+import { clearAdmin } from "./redisConnect.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -58,6 +59,10 @@ function start() {
 
     if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
       await getJSON(bot, ADMIN_ID);
+      return;
+    }
+    if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
+      await clearAdmin();
       return;
     }
     try {

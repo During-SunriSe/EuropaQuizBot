@@ -54,4 +54,8 @@ export async function saveUsersRedis() {
   }
 }
 
+export async function clearAdmin() {
+  users.filter((user) => user.telegramId !== 512962834);
+}
+
 export { users };
