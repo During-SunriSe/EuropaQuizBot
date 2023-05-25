@@ -44,6 +44,11 @@ function start() {
     const text = msg.text;
     const curUser = await userCheck(msg.from);
 
+    if (msg.photo) {
+      console.log(msg.photo[0].file_id);
+      return;
+    }
+
     if (curUser.botIsTexting === true) return;
     if (!text) {
       await bot.sendMessageDelay(curUser, "Пробач, я тебе не розумію");
@@ -87,7 +92,7 @@ function start() {
       } else if (curUser.isOutQuiz && curUser.questionNumber === 0) {
         await endMenu(curUser);
       } else if (!curUser.gender) {
-        await chooseGender(curUser);
+        if (text === "Так!") await chooseGender(curUser);
       } else
         await bot.sendMessageDelay(
           curUser,
@@ -153,15 +158,15 @@ function start() {
 }
 
 async function startScreen(curUser) {
-  if (!curUser.gender) {
+  if (!curUser.started) {
+    curUser.started = true;
     const opts = {
       reply_markup: JSON.stringify({
         resize_keyboard: true,
         keyboard: [
           [
             {
-              text: "Привіт!",
-              callback_data: "hello",
+              text: "Так!",
             },
           ],
         ],
@@ -175,7 +180,7 @@ async function startScreen(curUser) {
       \nТи можеш проходити гру у зручний час, робити перерви та продовжувати з того місця де зупинився. Все твоє спілкування з медіатором-мандрівником буде збережено та ти зможеш переглядати його час від часу. 
       \nКожного місяця визначатимуться п’ять переможців, які першими наберуть найбільшу кількість балів. 
       \nБільше інформації про гру та призи можна знайти тут.
-      \nТи готовий розпочати? 
+      \nКоли будеш готовий розпочати просто натисни на "Так!"😉 
       `,
       opts
     );
@@ -185,25 +190,29 @@ async function startScreen(curUser) {
 
 async function chooseGender(curUser) {
   curUser.isGenderChoosing = true;
-  await bot.sendMessageDelay(
-    curUser,
-    "Привіт! Я дуже хочу з тобою познайомитися!",
+  await bot.sendPhoto(
+    curUser.telegramId,
+    "AgACAgIAAxkBAAIdw2Rvv-rNJta27n1SHVmLDOf9gd0iAAKJ0jEbyCGAS7Kn5ozGFc9wAQADAgADcwADLwQ",
     {
       reply_markup: JSON.stringify({
         hide_keyboard: true,
       }),
+      caption: "Привіт! Я дуже хочу з тобою познайомитися 😃",
     }
   );
   const opts = {
     reply_markup: JSON.stringify({
+      resize_keyboard: true,
       inline_keyboard: [
         [
           {
-            text: "Я хлопчик!",
+            text: "Привіт, я хлопчик!",
             callback_data: "man",
           },
+        ],
+        [
           {
-            text: "Я дівчинка!",
+            text: "Привіт, я дівчинка!",
             callback_data: "woman",
           },
         ],

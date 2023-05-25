@@ -8,6 +8,7 @@ class User {
   questionNumber = 0;
   curPoints = [];
   points = 0;
+  started = false;
   isGenderChoosing = false;
   isNameWriting = false;
   isAgeWriting = false;
