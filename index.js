@@ -478,7 +478,7 @@ async function mediatorsKnow(curUser, know) {
   }
   await bot.sendMessageDelay(
     curUser,
-    "Як думаєш Медіатор це \n\n1. Прилад для гри на гітарі \n2. Особа, яка проводить медіацію \n3.Обидва варіанти",
+    "Як думаєш Медіатор це \n\n1. Прилад для гри на гітарі \n2. Особа, яка проводить медіацію \n3. Обидва варіанти",
     {
       reply_markup: JSON.stringify({
         resize_keyboard: true,
@@ -683,7 +683,6 @@ async function endQuiz(curUser) {
   } else {
     await bot.sendMessageDelay(
       curUser,
-
       `Напоминаю, что как результат учитывается только первое прохождение)`
     );
   }
