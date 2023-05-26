@@ -113,9 +113,9 @@ function start() {
   });
 
   bot.on("callback_query", async (msg) => {
-    if (msg.data !== "#") await editButtons(msg);
     const curUser = await userCheck(msg.from);
     if (curUser.botIsTexting === true) return;
+    if (msg.data !== "#") await editButtons(msg);
     let callbackText = "";
     bot.answerCallbackQuery(msg.id, {
       text: callbackText,
