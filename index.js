@@ -113,6 +113,7 @@ function start() {
   });
 
   bot.on("callback_query", async (msg) => {
+    if (msg.data !== "#") await editButtons(msg);
     const curUser = await userCheck(msg.from);
     if (curUser.botIsTexting === true) return;
     let callbackText = "";
@@ -256,7 +257,7 @@ async function sendInfo(curUser) {
     curUser,
     "•	Останнє завдання – творче, про нього в кінці гри."
   );
-  await bot.sendMessageDelay(curUser, "Більша детальна інформація тут:");
+  await bot.sendMessageDelay(curUser, "Більш детальна інформація тут:");
 }
 
 async function lookAtName(curUser, text) {
@@ -264,7 +265,7 @@ async function lookAtName(curUser, text) {
   if (res === "long") {
     await bot.sendMessageDelay(
       curUser,
-      "Будь ласка, напиши свое им'я одним словом 🙂"
+      "Будь ласка, напиши своє ім'я одним словом 🙂"
     );
   } else {
     const opts = {
@@ -698,6 +699,25 @@ async function save() {
 
 async function endMenu(curUser) {
   await bot.sendMessageDelay(curUser, "Спасибо за прохождение квиза!");
+}
+
+async function editButtons(msg) {
+  const buttons = msg.message.reply_markup.inline_keyboard;
+  for (let i = 0; i < buttons.length; i++) {
+    for (let j = 0; j < buttons[i].length; j++) {
+      if (buttons[i][j].callback_data === msg.data) buttons[i][j].text += " ✅";
+      buttons[i][j].callback_data = "#";
+    }
+  }
+  bot.editMessageReplyMarkup(
+    {
+      inline_keyboard: buttons,
+    },
+    {
+      chat_id: msg.from.id,
+      message_id: msg.message.message_id,
+    }
+  );
 }
 
 async function timeout(curUser, ms) {
