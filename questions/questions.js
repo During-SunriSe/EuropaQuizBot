@@ -4,6 +4,10 @@ let questions = JSON.parse(
   fs.readFileSync("./questions/questions.json").toString()
 );
 
+const questionLength = questions.length;
+
+export { questionLength };
+
 export async function questionText(questionNumber) {
   return questions[questionNumber].questionText;
 }

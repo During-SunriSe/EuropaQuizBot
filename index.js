@@ -15,6 +15,7 @@ import {
   optsOptions,
   checkAnswer,
   getComment,
+  questionLength,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
 import { clearAdmin, clearAll } from "./redisConnect.js";
@@ -607,25 +608,19 @@ async function showExplanation(curUser) {
 }
 
 async function askQuestion(curUser) {
-  if (curUser.questionNumber > 2) await endQuiz(curUser);
+  if (curUser.questionNumber >= questionLength) await endQuiz(curUser);
   else {
     curUser.isInQuiz = true;
     await bot.sendMessageDelay(
       curUser,
-
       await questionText(curUser.questionNumber)
     );
-    await bot.sendMessageDelay(
-      curUser,
-
-      await optionsText(curUser),
-      {
-        reply_markup: JSON.stringify({
-          keyboard: [await optsOptions(curUser.questionNumber)],
-          resize_keyboard: true,
-        }),
-      }
-    );
+    await bot.sendMessageDelay(curUser, await optionsText(curUser), {
+      reply_markup: JSON.stringify({
+        keyboard: [await optsOptions(curUser.questionNumber)],
+        resize_keyboard: true,
+      }),
+    });
   }
 }
 
@@ -644,14 +639,18 @@ async function sendAnswer(curUser, res) {
         curUser.curPoints[curUser.curPoints.length - 1]--;
     }
   } else {
-    await bot.sendMessageDelay(curUser, "Перевіряю...", {
-      reply_markup: JSON.stringify({
-        hide_keyboard: true,
-      }),
-    });
     await bot.sendMessageDelay(
       curUser,
-      await getComment(curUser.questionNumber, num),
+      getComment(curUser.questionNumber, num)[0],
+      {
+        reply_markup: JSON.stringify({
+          hide_keyboard: true,
+        }),
+      }
+    );
+    await bot.sendMessageDelay(
+      curUser,
+      await getComment(curUser.questionNumber, num)[1],
       {
         reply_markup: JSON.stringify({
           inline_keyboard: [
