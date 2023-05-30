@@ -3,7 +3,7 @@ import {
   userCheck,
   checkName,
   checkAge,
-  checkCategory,
+  //  checkCategory,
   getJSON,
   saveUsers,
 } from "./users/users.js";
@@ -14,6 +14,7 @@ import {
   optionsText,
   optsOptions,
   checkAnswer,
+  getComment,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
 import { clearAdmin, clearAll } from "./redisConnect.js";
@@ -87,11 +88,7 @@ function start() {
           reply_markup: JSON.stringify({ hide_keyboard: true }),
         });
       } else if (curUser.isInQuiz) {
-        const res = await checkAnswer(
-          curUser.questionNumber,
-          text,
-          curUser.category
-        );
+        const res = await checkAnswer(curUser.questionNumber, text);
         await sendAnswer(curUser, res);
       } else if (curUser.isOutQuiz && curUser.questionNumber === 0) {
         await endMenu(curUser);
@@ -317,7 +314,7 @@ async function lookAtAge(curUser, text) {
     await bot.sendMessageDelay(curUser, `Дякую!`);
     curUser.age = res;
     curUser.isAgeWriting = false;
-    await checkCategory(curUser);
+    // await checkCategory(curUser);
     await firstQuestion(curUser);
     //await startQuiz(curUser);
   }
@@ -572,7 +569,19 @@ async function startQuizAnswer(curUser, agree) {
 async function startQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    "Супер, ти молодець! Приємно з тобою мати справу ☺\n\nНу що, почнемо (Ответы сейчас 1, 3, 2)"
+    "Супер, ти молодець! Приємно з тобою мати справу ☺\n\nНу що, почнемо 😉"
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Я знаю, що на вашій планеті теж існує медіація, а у твоїй країні навіть є Закон  про медіацію та медіаторів."
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "МЕДІАЦІЯ - це такі переговори, під час  яких медіатор допомагає  сторонам конфлікту почути один одного та порозумітися. Дуже важливо, що брати участь у цих переговорах можуть тільки ті, хто справді цього бажає. Тобто не можна примусити когось до участі в медіації.  Також важливо знати, що це секретні переговори. Це означає, що ніхто з учасників медіації не може розповідати іншим, що він почув або дізнався або про що домовились під час цих переговорів."
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Забагато інформації? Будемо розбиратися."
   );
   await askQuestion(curUser);
 }
@@ -581,7 +590,7 @@ async function showExplanation(curUser) {
   await bot.sendMessageDelay(
     curUser,
 
-    await explanationText(curUser.questionNumber, curUser.category),
+    await explanationText(curUser.questionNumber),
     {
       reply_markup: JSON.stringify({
         inline_keyboard: [
@@ -604,17 +613,15 @@ async function askQuestion(curUser) {
     await bot.sendMessageDelay(
       curUser,
 
-      await questionText(curUser.questionNumber, curUser.category)
+      await questionText(curUser.questionNumber)
     );
     await bot.sendMessageDelay(
       curUser,
 
-      await optionsText(curUser, curUser.category),
+      await optionsText(curUser),
       {
         reply_markup: JSON.stringify({
-          keyboard: [
-            await optsOptions(curUser.questionNumber, curUser.category),
-          ],
+          keyboard: [await optsOptions(curUser.questionNumber)],
           resize_keyboard: true,
         }),
       }
@@ -623,43 +630,48 @@ async function askQuestion(curUser) {
 }
 
 async function sendAnswer(curUser, res) {
+  const num = +res.split(" ")[1];
+  res = res.split(" ")[0];
   if (res === "problem") {
     await bot.sendMessageDelay(curUser, "Вкажи варіант відповіді");
   } else if (res === "incorrect") {
     await bot.sendMessageDelay(
       curUser,
-
-      "Спробуй ще раз \n*Возможно комментарий к неправильному ответу*"
+      await getComment(curUser.questionNumber, num)
     );
     if (!curUser.isOutQuiz) {
       if (curUser.curPoints[curUser.curPoints.length - 1] > 0)
         curUser.curPoints[curUser.curPoints.length - 1]--;
     }
   } else {
-    await bot.sendMessageDelay(curUser, "Молодець!", {
+    await bot.sendMessageDelay(curUser, "Перевіряю...", {
       reply_markup: JSON.stringify({
         hide_keyboard: true,
       }),
     });
+    await bot.sendMessageDelay(
+      curUser,
+      await getComment(curUser.questionNumber, num),
+      {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [
+            [
+              {
+                text: "Чому інші неправильні?",
+                callback_data: `want${curUser.questionNumber + 1}`,
+              },
+            ],
+            [
+              {
+                text: "Зрозуміло",
+                callback_data: `ok${curUser.questionNumber + 1}`,
+              },
+            ],
+          ],
+        }),
+      }
+    );
     curUser.questionNumber++;
-    await bot.sendMessageDelay(curUser, "*Комментарий к правильному ответу*", {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: "Почему другие неправильны?",
-              callback_data: `want${curUser.questionNumber}`,
-            },
-          ],
-          [
-            {
-              text: "Понятно",
-              callback_data: `ok${curUser.questionNumber}`,
-            },
-          ],
-        ],
-      }),
-    });
     curUser.isInQuiz = false;
   }
 }

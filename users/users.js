@@ -27,10 +27,10 @@ export async function checkAge(text) {
   return 0;
 }
 
-export async function checkCategory(curUser) {
-  if (curUser.age <= 10) curUser.category = 0;
-  else curUser.category = 1;
-}
+// export async function checkCategory(curUser) {
+//   if (curUser.age <= 10) curUser.category = 0;
+//   else curUser.category = 1;
+// }
 
 export async function saveUsers() {
   for (const user of users) {
