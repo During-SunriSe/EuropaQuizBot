@@ -369,7 +369,7 @@ async function checkFirstAnswer(curUser, text) {
 async function nameStory(curUser) {
   await bot.sendMessageDelay(curUser, "Мене звати…");
   await bot.sendMessageDelay(curUser, "Мене звааааааатиии… ");
-  await bot.sendMessageDelay(curUser, " упс… 😐");
+  await bot.sendMessageDelay(curUser, "упс… 😐");
   await bot.sendMessageDelay(curUser, "я не пам’ятаю…");
   await bot.sendMessageDelay(
     curUser,
@@ -641,7 +641,9 @@ async function sendAnswer(curUser, res) {
   } else {
     await bot.sendMessageDelay(
       curUser,
-      getComment(curUser.questionNumber, num)[0],
+      (
+        await getComment(curUser.questionNumber, num)
+      )[0],
       {
         reply_markup: JSON.stringify({
           hide_keyboard: true,
@@ -650,16 +652,18 @@ async function sendAnswer(curUser, res) {
     );
     await bot.sendMessageDelay(
       curUser,
-      await getComment(curUser.questionNumber, num)[1],
+      (
+        await getComment(curUser.questionNumber, num)
+      )[1],
       {
         reply_markup: JSON.stringify({
           inline_keyboard: [
-            [
-              {
-                text: "Чому інші неправильні?",
-                callback_data: `want${curUser.questionNumber + 1}`,
-              },
-            ],
+            // [
+            //   {
+            //     text: "Чому інші неправильні?",
+            //     callback_data: `want${curUser.questionNumber + 1}`,
+            //   },
+            // ],
             [
               {
                 text: "Зрозуміло",
