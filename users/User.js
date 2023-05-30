@@ -4,7 +4,6 @@ class User {
   name;
   age;
   gender = "";
-  category = 0;
   questionNumber = 0;
   curPoints = [];
   points = 0;

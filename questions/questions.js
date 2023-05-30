@@ -34,6 +34,7 @@ export async function checkAnswer(questionNumber, input) {
     parseInt(input) > 0 &&
     parseInt(input) <= questions[questionNumber].options.length
   ) {
+    if ([0, 4].includes(questionNumber)) return "correct" + input;
     if (parseInt(input) === questions[questionNumber].correctAnswer)
       return "correct " + input;
     else return "incorrect " + input;
@@ -50,6 +51,10 @@ export async function explanationText(questionNumber) {
 }
 
 export async function getComment(questionNumber, answerNumber) {
+  if (!answerNumber) {
+    const correctAnswer = questions[questionNumber].correctAnswer;
+    return questions[questionNumber].comment[correctAnswer - 1];
+  }
   return questions[questionNumber].comment[answerNumber - 1];
 }
 

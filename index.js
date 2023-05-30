@@ -112,13 +112,13 @@ function start() {
 
   bot.on("callback_query", async (msg) => {
     const curUser = await userCheck(msg.from);
-    if (curUser.botIsTexting === true) return;
-    if (msg.data !== "#") await editButtons(msg);
-    let callbackText = "";
     bot.answerCallbackQuery(msg.id, {
       text: callbackText,
       show_alert: true,
     });
+    if (curUser.botIsTexting === true) return;
+    if (msg.data !== "#") await editButtons(msg);
+    let callbackText = "";
     try {
       if (curUser.isGenderChoosing) {
         if (msg.data === "man" || msg.data === "woman") {
@@ -263,7 +263,7 @@ async function lookAtName(curUser, text) {
   if (res === "long") {
     await bot.sendMessageDelay(
       curUser,
-      "Будь ласка, напиши своє ім'я одним словом 🙂"
+      "Будь ласка, напиши ім'я одним словом 🙂"
     );
   } else {
     const opts = {
@@ -611,6 +611,12 @@ async function askQuestion(curUser) {
   if (curUser.questionNumber >= questionLength) await endQuiz(curUser);
   else {
     curUser.isInQuiz = true;
+    const curComment = await getComment(curUser.questionNumber - 1);
+    if (curComment[2]) {
+      for (let i = 2; i < curComment.length; i++) {
+        await bot.sendMessageDelay(curUser, curComment[i]);
+      }
+    }
     await bot.sendMessageDelay(
       curUser,
       await questionText(curUser.questionNumber)
@@ -637,6 +643,8 @@ async function sendAnswer(curUser, res) {
     if (!curUser.isOutQuiz) {
       if (curUser.curPoints[curUser.curPoints.length - 1] > 0)
         curUser.curPoints[curUser.curPoints.length - 1]--;
+      if ([0, 4].includes(curUser.questionNumber))
+        curUser.curPoints[curUser.curPoints.length - 1] = 20;
     }
   } else {
     await bot.sendMessageDelay(
@@ -682,8 +690,7 @@ async function sendAnswer(curUser, res) {
 async function endQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
-
-    "Поздравляю с завершением квиза! \n\n*Прощальный текст*",
+    "Отже, ми з тобою дізнались про медіацію та медіатора. Залишилось розкрити тобі найголовніший секрет. Магія медіації відбувається, коли сторонам вдалося знайти рішення, яким вони задоволені. Тоді кожен з них є переможцем",
     {
       reply_markup: JSON.stringify({
         hide_keyboard: true,
@@ -692,16 +699,61 @@ async function endQuiz(curUser) {
   );
   if (!curUser.isOutQuiz) {
     curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
-    await bot.sendMessageDelay(curUser, `Результат: ${curUser.points}`);
+    await bot.sendMessageDelay(
+      curUser,
+      `Вітаю! Набрано: ${curUser.points}, балів`
+    );
+    await bot.sendMessageDelay(
+      curUser,
+      `Переможці квесту, які отримують призи будуть визначені першого числа наступного місяця відповідно до правил (сделать активной ссілкой)`
+    );
+    await afterQuiz(curUser);
   } else {
     await bot.sendMessageDelay(
       curUser,
       `Напоминаю, что как результат учитывается только первое прохождение)`
     );
   }
-  curUser.questionNumber = 0;
-  curUser.isInQuiz = false;
-  curUser.isOutQuiz = true;
+  // curUser.questionNumber = 0;
+  // curUser.isInQuiz = false; tut
+  // curUser.isOutQuiz = true;
+}
+
+async function afterQuiz(curUser) {
+  await bot.sendMessageDelay(
+    curUser,
+    `А зараз пропоную повернутися до мого імені.`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Підсумуємо - воно має бути вигаданим і відображати мої властивості:`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Я вмію уважно слухати, наче мати чарівні вуха, щоб вірно зрозуміти кожного.`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Я майстерно розмовляю,  і при цьому вмію тримати язик за зубами і не розповідаю іншим про те що дізнався від сторін конфлікту.`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Я вміло керую медіацією, наче диригент, ось і тут є чарівна паличка, але не підказую, яке рішення краще та не приймаю його.`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Я намагаюсь розуміти почуття та потреби кожного в конфлікті. `
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Я, однаково доброзичливо ставлюсь до всіх сторін конфлікту, не оцінюю та засуджую їх.  `
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Отже, ми підсумували і саме час почути яке ім’я ти меня придумав. `
+  );
+
+  await addName(curUser);
 }
 
 async function save() {
