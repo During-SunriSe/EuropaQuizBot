@@ -114,7 +114,7 @@ function start() {
       } else
         await bot.sendMessageDelay(
           curUser,
-          "Щоб продовжити, ознайомся з текстом та нажми на кнопку під ним 😉"
+          "Щоб продовжити, ознайомся з текстом та натисни на кнопку під ним 😉"
         );
     } catch (e) {
       console.log(e);
@@ -128,7 +128,6 @@ function start() {
 
   bot.on("callback_query", async (msg) => {
     const curUser = await userCheck(msg.from);
-    console.log(msg);
 
     let callbackText = "";
     bot.answerCallbackQuery(msg.id, {
@@ -144,7 +143,7 @@ function start() {
       if (msg.data === "help") {
         AsksForHelp(curUser);
       } else if (msg.data.includes("note")) {
-        curUser.note = msg.message.text;
+        await giveNote(curUser, msg.data);
         await bot.sendMessageDelay(curUser, "Дякую за відгук!");
       } else if (curUser.isGenderChoosing) {
         if (msg.data === "man" || msg.data === "woman") {
@@ -616,23 +615,23 @@ async function startQuiz(curUser) {
 }
 
 async function showExplanation(curUser) {
-  await bot.sendMessageDelay(
-    curUser,
-
-    await explanationText(curUser.questionNumber),
-    {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: "Зрозуміло",
-              callback_data: `ok${curUser.questionNumber}`,
-            },
+  let explanation = await explanationText(curUser.questionNumber);
+  for (let i = 0; i < explanation.length; i++) {
+    if (i === explanation.length - 1) {
+      await bot.sendMessageDelay(curUser, explanation[i], {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [
+            [
+              {
+                text: "Зрозуміло",
+                callback_data: `ok${curUser.questionNumber}`,
+              },
+            ],
           ],
-        ],
-      }),
-    }
-  );
+        }),
+      });
+    } else await bot.sendMessageDelay(curUser, explanation[i]);
+  }
 }
 
 async function askQuestion(curUser) {
@@ -757,7 +756,7 @@ async function afterQuiz(curUser) {
   );
   await bot.sendMessageDelay(
     curUser,
-    `Я вміло керую медіацією, наче диригент. (ось і тут є чарівна паличка) Але не підказую яке рішення краще та не приймаю його`
+    `Я вміло керую медіацією, наче диригент (ось і тут є чарівна паличка). Але не підказую яке рішення краще та не приймаю його`
   );
   await bot.sendMessageDelay(
     curUser,
@@ -790,7 +789,7 @@ async function botNameApprove(curUser) {
     curUser,
     "Вау, супер! Дякую тобі. Тепер у мене знов є ім’я. Я був впевнений, що з цим завданням ти також впораєшся. Дам тобі цілих 16 балів за нього!"
   );
-  curUser.curPoint.push(16);
+  curUser.curPoints.push(16);
   curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
   await bot.sendMessageDelay(
     curUser,
@@ -951,6 +950,14 @@ async function save() {
 
 async function endMenu(curUser) {
   await bot.sendMessageDelay(curUser, "Дякую за прохождення квесту!");
+}
+
+async function giveNote(curUser, note) {
+  if (note.includes("1")) curUser.note = "плохо";
+  else if (note.includes("2")) curUser.note = "не очень";
+  else if (note.includes("3")) curUser.note = "средне";
+  else if (note.includes("4")) curUser.note = "хорошо";
+  else curUser.note = "очень хорошо";
 }
 
 async function editButtons(msg) {

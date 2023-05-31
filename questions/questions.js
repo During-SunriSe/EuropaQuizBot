@@ -49,11 +49,7 @@ export async function checkAnswer(questionNumber, input) {
 
 export async function explanationText(questionNumber) {
   const curQuestion = questions[questionNumber - 1];
-  let output = "";
-  for (let i = 0; i < curQuestion.explanation.length; i++) {
-    output += `${curQuestion.explanation[i]}\n`;
-  }
-  return output;
+  return curQuestion.explanation;
 }
 
 export async function getComment(questionNumber, answerNumber) {
