@@ -144,6 +144,7 @@ function start() {
         AsksForHelp(curUser);
       } else if (msg.data === "note") {
         curUser.note = msg.message.text;
+        await bot.sendMessageDelay(curUser, "Дякую за відгук!");
       } else if (curUser.isGenderChoosing) {
         if (msg.data === "man" || msg.data === "woman") {
           await genderIsChosen(curUser, msg.data);
@@ -690,13 +691,21 @@ async function sendAnswer(curUser, res) {
         },
       ],
     ];
-    if (curUser.questionNumber === 8)
+    if (curUser.questionNumber === 8) {
+      inlineArr[0][0].text = "Не цікаво";
       inlineArr.unshift([
         {
-          text: "Чому інші неправильні?",
+          text: "Цікаво!",
           callback_data: `want${curUser.questionNumber + 1}`,
         },
       ]);
+    }
+    if (curUser.questionNumber === 4) {
+      inlineArr[0][0].text = "Дякую!";
+    }
+    if (curUser.questionNumber === 6) {
+      inlineArr[0][0].text = "Далі";
+    }
     await bot.sendMessageDelay(
       curUser,
       (
@@ -726,11 +735,6 @@ async function endQuiz(curUser) {
   if (!curUser.isOutQuiz) {
     curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
     await afterQuiz(curUser);
-  } else {
-    await bot.sendMessageDelay(
-      curUser,
-      `Напоминаю, что как результат учитывается только первое прохождение)`
-    );
   }
 }
 
@@ -833,34 +837,38 @@ async function botNameApprove(curUser) {
       }),
     }
   );
-  await bot.sendMessageDelay(curUser, "Як тобі квіз?)", {
+
+  const opts = {
     reply_markup: JSON.stringify({
+      resize_keyboard: true,
       inline_keyboard: [
         [
           {
             text: "☹",
-            сallback_data: "note",
+            callback_data: "note",
           },
           {
             text: "🙁",
-            сallback_data: "note",
+            callback_data: "note",
           },
           {
             text: "😐",
-            сallback_data: "note",
+            callback_data: "note",
           },
           {
             text: "🙂",
-            сallback_data: "note",
+            callback_data: "note",
           },
           {
             text: "😀",
-            сallback_data: "note",
+            callback_data: "note",
           },
         ],
       ],
     }),
-  });
+  };
+  await bot.sendMessageDelay(curUser, "Чи сподобався тобі квіз?", opts);
+
   curUser.questionNumber = 0;
   curUser.isInQuiz = false;
   curUser.isOutQuiz = true;
@@ -907,7 +915,7 @@ async function sendHelp(curUser, text) {
     );
     bot.sendMessage(
       process.env.ADMIN_SECOND_ID,
-      `#помощь\n\nПользователь ${curUser.telegramId} оставил сообщение:\n\n ${text}`
+      `#помощь\n\nПользователь @${curUser.username} оставил сообщение:\n\n ${text}`
     );
   } else {
     bot.sendMessage(

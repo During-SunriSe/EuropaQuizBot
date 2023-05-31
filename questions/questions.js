@@ -51,7 +51,7 @@ export async function explanationText(questionNumber) {
   const curQuestion = questions[questionNumber - 1];
   let output = "";
   for (let i = 0; i < curQuestion.explanation.length; i++) {
-    output += `${i + 1}. ${curQuestion.explanation[i]}\n`;
+    output += `${curQuestion.explanation[i]}\n`;
   }
   return output;
 }
