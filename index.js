@@ -819,8 +819,8 @@ async function botNameApprove(curUser) {
         inline_keyboard: [
           [
             {
-              text: "Тижневий звіт",
-              url: "https://docs.google.com/forms/d/e/1FAIpQLSdx8FjaI5KC7ZZyL3Osv53oUpHV6_6QM1O5ntkeSP7mbuJyjQ/viewform?usp=sf_link",
+              text: "...",
+              url: "tg://user?id=" + process.env.ADMIN_SECOND_ID,
             },
           ],
           [
@@ -970,7 +970,7 @@ async function timeout(curUser, ms) {
 TelegramBot.prototype.sendMessageDelay = async function (curUser, text, opts) {
   curUser.botIsTexting = true;
   await this.sendChatAction(curUser.telegramId, "typing");
-  await timeout(curUser, text.length * 0);
+  await timeout(curUser, text.length * 50);
   await this.sendMessage(curUser.telegramId, text, opts);
 };
 
