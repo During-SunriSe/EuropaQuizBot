@@ -991,7 +991,7 @@ async function timeout(curUser, ms) {
 TelegramBot.prototype.sendMessageDelay = async function (curUser, text, opts) {
   curUser.botIsTexting = true;
   await this.sendChatAction(curUser.telegramId, "typing");
-  await timeout(curUser, text.length * 50);
+  await timeout(curUser, text.length * 50 > 5000 ? 5000 : text.length * 50);
   await this.sendMessage(curUser.telegramId, text, opts);
 };
 
