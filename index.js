@@ -18,7 +18,7 @@ import {
   questionLength,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
-import { clearAdmin, clearAll } from "./redisConnect.js";
+import { clearAdmin, clearAll, clearUser } from "./redisConnect.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -31,12 +31,12 @@ const ADMIN_ID = parseInt(process.env.ADMIN_ID);
 
 process.on("uncaughtException", async (error, source) => {
   console.log(error, source);
-  await bot.sendDocument(ADMIN_ID, "./users/users.json");
+  await bot.sendDocument(process.env.ADMIN_ID, "./users/users.json");
 });
 
 bot.setMyCommands([
-  { command: "/restart", description: "Почати знову" },
   { command: "/info", description: "Правила" },
+  { command: "/help", description: "Допомога" },
 ]);
 
 function start() {
@@ -61,25 +61,41 @@ function start() {
       await getJSON(bot, ADMIN_ID);
       return;
     }
+
     if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
       clearAdmin();
       return;
     }
+
+    if (text.includes("/clearUser") && curUser.telegramId === ADMIN_ID) {
+      clearUser(text);
+      return;
+    }
+
     if (text === "/clearAll" && curUser.telegramId === ADMIN_ID) {
       clearAll();
       return;
     }
+
     try {
       if (text === "/start") {
         await startScreen(curUser);
-      } else if (text === "/restart") {
-        await restartQuiz(curUser);
       } else if (text === "/info") {
         await sendInfo(curUser);
+      } else if (text === "/help") {
+        await help(curUser);
+      } else if (curUser.helpAsking) {
+        if (text.toLowerCase() === "скасувати") {
+          cancelHelp(curUser);
+        } else {
+          sendHelp(curUser, text);
+        }
       } else if (curUser.isAgeWriting) {
         await lookAtAge(curUser, text);
       } else if (curUser.isNameWriting) {
         await lookAtName(curUser, text);
+      } else if (curUser.isBotNameWriting) {
+        await lookAtName(curUser, text, true);
       } else if (curUser.isMediatorAnswerWriting) {
         await checkMediatorAnswer(curUser, text);
       } else if (curUser.whatIsForgotten) {
@@ -112,15 +128,23 @@ function start() {
 
   bot.on("callback_query", async (msg) => {
     const curUser = await userCheck(msg.from);
+
+    let callbackText = "";
     bot.answerCallbackQuery(msg.id, {
       text: callbackText,
       show_alert: true,
     });
+
     if (curUser.botIsTexting === true) return;
+
     if (msg.data !== "#") await editButtons(msg);
-    let callbackText = "";
+
     try {
-      if (curUser.isGenderChoosing) {
+      if (msg.data === "help") {
+        AsksForHelp(curUser);
+      } else if (msg.data === "note") {
+        curUser.note = msg.message.text;
+      } else if (curUser.isGenderChoosing) {
         if (msg.data === "man" || msg.data === "woman") {
           await genderIsChosen(curUser, msg.data);
         }
@@ -129,6 +153,12 @@ function start() {
           await nameApprove(curUser);
         } else if (msg.data === "change") {
           await addName(curUser, true);
+        }
+      } else if (curUser.isBotNameWriting) {
+        if (msg.data === "yes") {
+          await botNameApprove(curUser);
+        } else if (msg.data === "change") {
+          await addBotName(curUser, true);
         }
       } else if (curUser.firstQuestionAsking) {
         if (msg.data === "yeah") {
@@ -187,8 +217,7 @@ async function startScreen(curUser) {
       `,
       opts
     );
-  } else
-    await bot.sendMessageDelay(curUser, "Щоб почати знову, натисни /restart");
+  } else await bot.sendMessageDelay(curUser, "Квіз вже почався)");
 }
 
 async function chooseGender(curUser) {
@@ -258,7 +287,7 @@ async function sendInfo(curUser) {
   await bot.sendMessageDelay(curUser, "Детальніше про правила та призи тут 🧐");
 }
 
-async function lookAtName(curUser, text) {
+async function lookAtName(curUser, text, forBot = false) {
   let res = await checkName(text);
   if (res === "long") {
     await bot.sendMessageDelay(
@@ -284,12 +313,21 @@ async function lookAtName(curUser, text) {
         ],
       }),
     };
-    curUser.name = res;
-    await bot.sendMessageDelay(
-      curUser,
-      `${res}, так? Перевір, будь ласка, чи ти правильно написав ім'я 😊`,
-      opts
-    );
+    if (!forBot) {
+      curUser.name = res;
+      await bot.sendMessageDelay(
+        curUser,
+        `${res}, так? Перевір, будь ласка, чи ти правильно написав ім'я 😊`,
+        opts
+      );
+    } else {
+      curUser.botName = res;
+      await bot.sendMessageDelay(
+        curUser,
+        `Я медіатор-мандрівник по імені ${res}, так?😊`,
+        opts
+      );
+    }
   }
 }
 
@@ -570,19 +608,7 @@ async function startQuizAnswer(curUser, agree) {
 async function startQuiz(curUser) {
   await bot.sendMessageDelay(
     curUser,
-    "Супер, ти молодець! Приємно з тобою мати справу ☺\n\nНу що, почнемо 😉"
-  );
-  await bot.sendMessageDelay(
-    curUser,
     "Я знаю, що на вашій планеті теж існує медіація, а у твоїй країні навіть є Закон  про медіацію та медіаторів."
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    "МЕДІАЦІЯ - це такі переговори, під час  яких медіатор допомагає  сторонам конфлікту почути один одного та порозумітися. Дуже важливо, що брати участь у цих переговорах можуть тільки ті, хто справді цього бажає. Тобто не можна примусити когось до участі в медіації.  Також важливо знати, що це секретні переговори. Це означає, що ніхто з учасників медіації не може розповідати іншим, що він почув або дізнався або про що домовились під час цих переговорів."
-  );
-  await bot.sendMessageDelay(
-    curUser,
-    "Забагато інформації? Будемо розбиратися."
   );
   await askQuestion(curUser);
 }
@@ -611,10 +637,10 @@ async function askQuestion(curUser) {
   if (curUser.questionNumber >= questionLength) await endQuiz(curUser);
   else {
     curUser.isInQuiz = true;
-    const curComment = await getComment(curUser.questionNumber - 1);
-    if (curComment[2]) {
-      for (let i = 2; i < curComment.length; i++) {
-        await bot.sendMessageDelay(curUser, curComment[i]);
+    const extraComments = await getComment(curUser.questionNumber - 1);
+    if (extraComments.length) {
+      for (let i = 0; i < extraComments.length; i++) {
+        await bot.sendMessageDelay(curUser, extraComments[i]);
       }
     }
     await bot.sendMessageDelay(
@@ -643,8 +669,6 @@ async function sendAnswer(curUser, res) {
     if (!curUser.isOutQuiz) {
       if (curUser.curPoints[curUser.curPoints.length - 1] > 0)
         curUser.curPoints[curUser.curPoints.length - 1]--;
-      if ([0, 4].includes(curUser.questionNumber))
-        curUser.curPoints[curUser.curPoints.length - 1] = 20;
     }
   } else {
     await bot.sendMessageDelay(
@@ -658,6 +682,21 @@ async function sendAnswer(curUser, res) {
         }),
       }
     );
+    const inlineArr = [
+      [
+        {
+          text: "Зрозуміло",
+          callback_data: `ok${curUser.questionNumber + 1}`,
+        },
+      ],
+    ];
+    if (curUser.questionNumber === 8)
+      inlineArr.unshift([
+        {
+          text: "Чому інші неправильні?",
+          callback_data: `want${curUser.questionNumber + 1}`,
+        },
+      ]);
     await bot.sendMessageDelay(
       curUser,
       (
@@ -665,20 +704,7 @@ async function sendAnswer(curUser, res) {
       )[1],
       {
         reply_markup: JSON.stringify({
-          inline_keyboard: [
-            // [
-            //   {
-            //     text: "Чому інші неправильні?",
-            //     callback_data: `want${curUser.questionNumber + 1}`,
-            //   },
-            // ],
-            [
-              {
-                text: "Зрозуміло",
-                callback_data: `ok${curUser.questionNumber + 1}`,
-              },
-            ],
-          ],
+          inline_keyboard: inlineArr,
         }),
       }
     );
@@ -699,14 +725,6 @@ async function endQuiz(curUser) {
   );
   if (!curUser.isOutQuiz) {
     curUser.points = curUser.curPoints.reduce((a, b) => +a + +b);
-    await bot.sendMessageDelay(
-      curUser,
-      `Вітаю! Набрано: ${curUser.points}, балів`
-    );
-    await bot.sendMessageDelay(
-      curUser,
-      `Переможці квесту, які отримують призи будуть визначені першого числа наступного місяця відповідно до правил (сделать активной ссілкой)`
-    );
     await afterQuiz(curUser);
   } else {
     await bot.sendMessageDelay(
@@ -714,9 +732,6 @@ async function endQuiz(curUser) {
       `Напоминаю, что как результат учитывается только первое прохождение)`
     );
   }
-  // curUser.questionNumber = 0;
-  // curUser.isInQuiz = false; tut
-  // curUser.isOutQuiz = true;
 }
 
 async function afterQuiz(curUser) {
@@ -753,7 +768,163 @@ async function afterQuiz(curUser) {
     `Отже, ми підсумували і саме час почути яке ім’я ти меня придумав. `
   );
 
-  await addName(curUser);
+  await addBotName(curUser);
+}
+
+async function addBotName(curUser, rewrite = false) {
+  curUser.isBotNameWriting = true;
+  if (rewrite) {
+    await bot.sendMessageDelay(curUser, "Добре, напиши ще раз 😌");
+  } else {
+    await bot.sendMessageDelay(curUser, "Напиши твою пропозицію");
+  }
+}
+
+async function botNameApprove(curUser) {
+  curUser.isBotNameWriting = false;
+  await bot.sendMessageDelay(
+    curUser,
+    "Вау, супер! Дякую тобі. Тепер у мене знов є ім’я. Я був впевнений, що з цим завданням ти також впораєшся."
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `Вітаю! Тобі вдалося успішно пройти цей квіз та набрати ${curUser.points}, балів`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    `В останній день цього місяця ми дізнаємося, кому вдалося набрати найбільшу кількість балів першими в цьому місяці. Вони отримають приз відповідно до Правил (сделать активной ссілкой)`
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Ледь не забув, у мене для тебе ще одне творче завдання! "
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Пропоную тобі стати чарівником та змінити мою зовнішність. Ти вже багато знаєш про мене і зможеш допомогти мені оновитися. Я буду радий отримати багато малюнків, які будуть нагадувати мені про мандри та наші з тобою пригоди. Якщо ти відчуваєш натхнення, то можеш намалювати і надіслати ілюстрації з тем квізу – конфліктний монстр, емоції, медіація чи щось інше, що тобі буде приємно намалювати."
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Автори кращих малюнків отримають призи відповідно до Правил."
+  );
+  await bot.sendMessageDelay(
+    curUser,
+    "Підсумки цього творчого конкурсу будуть підведені 01.09.2023 року"
+  );
+  await bot.sendMessageDelay(curUser, "Ти молодець, до зустрічі!");
+  await bot.sendMessageDelay(
+    curUser,
+    "Якщо в тебе залишилися запитання чи просто хочеш дізнатися більше про медіацію, то напиши мені",
+    {
+      reply_markup: JSON.stringify({
+        inline_keyboard: [
+          [
+            {
+              text: "Тижневий звіт",
+              url: "https://docs.google.com/forms/d/e/1FAIpQLSdx8FjaI5KC7ZZyL3Osv53oUpHV6_6QM1O5ntkeSP7mbuJyjQ/viewform?usp=sf_link",
+            },
+          ],
+          [
+            {
+              text: "Наш сайт",
+              url: "https://mediation.ua",
+            },
+          ],
+        ],
+      }),
+    }
+  );
+  await bot.sendMessageDelay(curUser, "Як тобі квіз?)", {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {
+            text: "☹",
+            сallback_data: "note",
+          },
+          {
+            text: "🙁",
+            сallback_data: "note",
+          },
+          {
+            text: "😐",
+            сallback_data: "note",
+          },
+          {
+            text: "🙂",
+            сallback_data: "note",
+          },
+          {
+            text: "😀",
+            сallback_data: "note",
+          },
+        ],
+      ],
+    }),
+  });
+  curUser.questionNumber = 0;
+  curUser.isInQuiz = false;
+  curUser.isOutQuiz = true;
+}
+
+async function help(curUser) {
+  const opts = {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {
+            text: "Залишити повідомлення",
+            callback_data: "help",
+          },
+        ],
+      ],
+    }),
+  };
+  bot.sendMessageDelay(
+    curUser,
+    "Якщо виникли якісь проблеми у прохожденні квізу, ти можеш залишити повідомлення і наша команда тобі допоможе!",
+    opts
+  );
+}
+
+async function AsksForHelp(curUser) {
+  curUser.helpAsking = true;
+  bot.sendMessageDelay(
+    curUser,
+    'Чекаю на повідомлення. Для скасування напишіть "скасувати"'
+  );
+}
+
+async function cancelHelp(curUser) {
+  curUser.helpAsking = false;
+  bot.sendMessageDelay(curUser, "Добре, сподіваємося, що проблеми вирішилися)");
+}
+
+async function sendHelp(curUser, text) {
+  if (curUser.username) {
+    bot.sendMessage(
+      process.env.ADMIN_ID,
+      `#помощь\n\nПользователь @${curUser.username} оставил сообщение:\n\n ${text}`
+    );
+    bot.sendMessage(
+      process.env.ADMIN_SECOND_ID,
+      `#помощь\n\nПользователь ${curUser.telegramId} оставил сообщение:\n\n ${text}`
+    );
+  } else {
+    bot.sendMessage(
+      process.env.ADMIN_ID,
+      `#помощь\n\nПользователь ${curUser.telegramId} оставил сообщение:\n\n ${text}`
+    );
+    bot.sendMessage(
+      process.env.ADMIN_SECOND_ID,
+      `#помощь\n\nПользователь ${curUser.telegramId} оставил сообщение:\n\n ${text}`
+    );
+  }
+  bot.sendMessageDelay(
+    curUser,
+    "Повідомлення відправлено. Сподіваємося, що зможемо тобі дпомогти!"
+  );
+
+  curUser.helpAsking = false;
 }
 
 async function save() {
@@ -765,7 +936,7 @@ async function save() {
 }
 
 async function endMenu(curUser) {
-  await bot.sendMessageDelay(curUser, "Спасибо за прохождение квиза!");
+  await bot.sendMessageDelay(curUser, "Спасибі за прохождення квізу!");
 }
 
 async function editButtons(msg) {
@@ -799,25 +970,26 @@ async function timeout(curUser, ms) {
 TelegramBot.prototype.sendMessageDelay = async function (curUser, text, opts) {
   curUser.botIsTexting = true;
   await this.sendChatAction(curUser.telegramId, "typing");
-  await timeout(curUser, text.length * 50);
+  await timeout(curUser, text.length * 0);
   await this.sendMessage(curUser.telegramId, text, opts);
 };
 
-async function restartQuiz(curUser) {
-  if (!curUser.points)
-    await bot.sendMessageDelay(
-      curUser,
-      "Щоб перезапустит квіз, його треба пройти хоча б один раз"
-    );
-  else {
-    curUser.questionNumber = 0;
-    await bot.sendMessageDelay(curUser, "Квиз розпочато знову", {
-      reply_markup: JSON.stringify({
-        hide_keyboard: true,
-      }),
-    });
-    await askQuestion(curUser);
-  }
-}
+// async function restartQuiz(curUser) {
+//   if (!curUser.points)
+//     await bot.sendMessageDelay(
+//       curUser,
+//       "Щоб перезапустит квіз, його треба пройти хоча б один раз"
+//     );
+//   else {
+//     curUser.questionNumber = 0;
+//     curUser.isInQuiz = true;
+//     await bot.sendMessageDelay(curUser, "Квиз розпочато знову", {
+//       reply_markup: JSON.stringify({
+//         hide_keyboard: true,
+//       }),
+//     });
+//     await askQuestion(curUser);
+//   }
+// }
 
 start();

@@ -60,6 +60,17 @@ export function clearAdmin() {
   });
 }
 
+export function clearUser(text) {
+  let id = text.split(" ")[1];
+  users = users.filter((user) => {
+    return user.telegramId !== parseInt(id);
+  });
+  id = id.slice(1);
+  users = users.filter((user) => {
+    return user.username !== id;
+  });
+}
+
 export function clearAll() {
   users = users.filter((user) => {
     return false;

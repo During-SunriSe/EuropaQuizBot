@@ -13,7 +13,12 @@ export async function questionText(questionNumber) {
 export async function optionsText(curUser) {
   const curQuestion = questions[curUser.questionNumber];
   let output = "";
-  if (!curUser.isOutQuiz) curUser.curPoints.push(curQuestion.options.length);
+  if (!curUser.isOutQuiz) {
+    if (questions[curUser.questionNumber].correctAnswer !== 0)
+      curUser.curPoints.push(curQuestion.options.length);
+    else if ([6, 7].includes(curUser.questionNumber)) curUser.curPoints.push(5);
+    else curUser.curPoints.push(20);
+  }
   for (let i = 0; i < curQuestion.options.length; i++) {
     output += `${i + 1}. ${curQuestion.options[i]}\n`;
   }
@@ -34,7 +39,8 @@ export async function checkAnswer(questionNumber, input) {
     parseInt(input) > 0 &&
     parseInt(input) <= questions[questionNumber].options.length
   ) {
-    if ([0, 4].includes(questionNumber)) return "correct" + input;
+    if (questions[questionNumber].correctAnswer === 0)
+      return "correct " + input;
     if (parseInt(input) === questions[questionNumber].correctAnswer)
       return "correct " + input;
     else return "incorrect " + input;
@@ -52,10 +58,9 @@ export async function explanationText(questionNumber) {
 
 export async function getComment(questionNumber, answerNumber) {
   if (!answerNumber) {
-    const correctAnswer = questions[questionNumber].correctAnswer;
-    return questions[questionNumber].comment[correctAnswer - 1];
+    const comments = questions[questionNumber]?.extraComment;
+    if (comments) return comments;
+    else return [];
   }
   return questions[questionNumber].comment[answerNumber - 1];
 }
-
-getComment(0, 2);
