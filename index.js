@@ -123,7 +123,7 @@ function start() {
       } else if (curUser.isInQuiz) {
         const res = await checkAnswer(curUser.questionNumber, text);
         await sendAnswer(curUser, res);
-      } else if (curUser.isOutQuiz && curUser.questionNumber === 0) {
+      } else if (curUser.isOutQuiz) {
         await endMenu(curUser);
       } else if (!curUser.gender) {
         if (text === "Так!") await chooseGender(curUser);
@@ -1000,8 +1000,18 @@ async function sendIllustration(curUser, msg) {
         curUser.username ? `@${curUser.username}` : curUser.telegramId
       }`,
     });
+    await bot.sendPhoto(process.env.ADMIN_SECOND_ID, msg.photo[0].file_id, {
+      caption: `#Малюнок\n\nКористувач ${
+        curUser.username ? `@${curUser.username}` : curUser.telegramId
+      }`,
+    });
   } else {
     await bot.sendDocument(process.env.ADMIN_ID, msg.document.file_id, {
+      caption: `#Малюнок\n\nКористувач ${
+        curUser.username ? `@${curUser.username}` : curUser.telegramId
+      }`,
+    });
+    await bot.sendDocument(process.env.ADMIN_SECOND_ID, msg.document.file_id, {
       caption: `#Малюнок\n\nКористувач ${
         curUser.username ? `@${curUser.username}` : curUser.telegramId
       }`,
