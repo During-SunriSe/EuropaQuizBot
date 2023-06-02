@@ -821,8 +821,7 @@ async function botNameApprove(curUser) {
 
   await bot.sendMessageDelay(
     curUser,
-    `Вітаю! 🥳🎉 Молодец!!! Пишаюсь знайомством з тобою. Тобі вдалося успішно пройти квест. 
-    А тепер порахуємо набрані тобою бали. Юхуууу, твій результат - ${curUser.points} !👏👏👏`
+    `Вітаю! 🥳🎉 А тепер порахуємо набрані тобою бали. Юхуууу, твій результат - ${curUser.points} !👏👏👏`
   );
   await bot.sendMessageDelay(
     curUser,
