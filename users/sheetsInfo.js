@@ -58,6 +58,7 @@ export async function setInfo() {
               ...curUser.curPoints,
               curUser.points,
               curUser.note,
+              curUser.date,
             ],
           ],
         },
