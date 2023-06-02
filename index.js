@@ -210,6 +210,7 @@ async function startScreen(curUser) {
     curUser.started = true;
     const opts = {
       parse_mode: "HTML",
+      disable_web_page_preview: true,
       reply_markup: JSON.stringify({
         resize_keyboard: true,
         keyboard: [
@@ -371,7 +372,7 @@ async function lookAtAge(curUser, text) {
   if (!res) {
     await bot.sendMessageDelay(curUser, "Напиши цифрами свій реальний вік 🙂");
   } else {
-    await bot.sendMessageDelay(curUser, `Дякую! 👍`);
+    await bot.sendMessageDelay(curUser, `🤩`);
     curUser.age = res;
     curUser.isAgeWriting = false;
     // await checkCategory(curUser);
@@ -615,13 +616,13 @@ async function startQuizAnswer(curUser, agree) {
     await bot.sendMessageDelay(
       curUser,
       "Супер! Але дозволь я тобі спочатку розповім про правила 😁 Вони <a href='https://docs.google.com/document/d/1Kw3fMgjkdaYNg2-k4cYk6S6gjBu1RkfF3N1qGmQ0xHg/edit?usp=sharing'>тут</a>",
-      { parse_mode: "HTML" }
+      { parse_mode: "HTML", disable_web_page_preview: true }
     );
   } else {
     await bot.sendMessageDelay(
       curUser,
       "Згоден, спочатку про правила, бо правила важлива річ 😁 Вони <a href='https://docs.google.com/document/d/1Kw3fMgjkdaYNg2-k4cYk6S6gjBu1RkfF3N1qGmQ0xHg/edit?usp=sharing'>тут</a>",
-      { parse_mode: "HTML" }
+      { parse_mode: "HTML", disable_web_page_preview: true }
     );
   }
   await sendInfo(curUser);
@@ -825,8 +826,8 @@ async function botNameApprove(curUser) {
   );
   await bot.sendMessageDelay(
     curUser,
-    `В останній день цього місяця будуть визначені 30 переможців, яким вдалося отримати найбільшу кількість балів першими. Можливо ти будеш одним з них. Бажаю успіху! <a href='https://docs.google.com/document/d/1Kw3fMgjkdaYNg2-k4cYk6S6gjBu1RkfF3N1qGmQ0xHg/edit?usp=sharing'>правил</a>`,
-    { parse_mode: "HTML" }
+    `В останній день цього місяця будуть визначені 30 переможців, яким вдалося отримати найбільшу кількість балів першими. Можливо ти будеш одним з них. Бажаю успіху!`,
+    { parse_mode: "HTML", disable_web_page_preview: true }
   );
   await bot.sendMessageDelay(
     curUser,
@@ -840,6 +841,11 @@ async function botNameApprove(curUser) {
     curUser,
     "Я буду радий отримати багато малюнків, які будуть нагадувати мені про мандри та наші з тобою пригоди ☺ Якщо ти відчуваєш натхнення, то можеш намалювати і надіслати ілюстрації на теми квесту: конфліктний монстр, емоції, медіація чи щось інше, що тобі буде приємно намалювати."
   );
+
+  await bot.sendMessageDelay(
+    curUser,
+    "Ти можеш надіслати один чи декілька малюнків до 1 вересня 2023 "
+  );
   await bot.sendMessageDelay(curUser, "Для відправки натисни на /send");
   await bot.sendMessageDelay(
     curUser,
@@ -847,7 +853,7 @@ async function botNameApprove(curUser) {
   );
   await bot.sendMessageDelay(
     curUser,
-    "Підсумки цього творчого конкурсу будуть підбиті 01.09.2023 року"
+    "Підсумки цього творчого конкурсу будуть підбиті 15.09.2023 року"
   );
   await bot.sendMessageDelay(
     curUser,
