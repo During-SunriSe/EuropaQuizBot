@@ -854,10 +854,6 @@ async function botNameApprove(curUser) {
     curUser.name +
       ", ти молодець! Ще раз дякую тобі за ім’я та за прекрасну компанію. Надзвичайно радий нашому знайомству. Мені вже час вирушати далі - на іншу планету 🤗"
   );
-  await bot.sendPhoto(
-    curUser.telegramId,
-    "AgACAgIAAxkBAAI0O2R5gHTWWSypbVy85Ktq-jpBnSeoAALvzDEbE__JS_y8JciTQ2vVAQADAgADcwADLwQ"
-  );
 
   curUser.isInQuiz = false;
   curUser.isOutQuiz = true;
@@ -885,11 +881,16 @@ async function botNameApprove(curUser) {
     }
   );
 
-  await bot.sendMessageDelay(
-    curUser,
-    "До нових зустрічей! 🤗✨ \nТвій медіатор-мандрівник " +
-      curUser.botName +
-      " 💙💛"
+  await timeout(curUser, 2000);
+  await bot.sendPhoto(
+    curUser.telegramId,
+    "AgACAgIAAxkBAAI0O2R5gHTWWSypbVy85Ktq-jpBnSeoAALvzDEbE__JS_y8JciTQ2vVAQADAgADcwADLwQ",
+    {
+      caption:
+        "До нових зустрічей! 🤗✨ \nТвій медіатор-мандрівник " +
+        curUser.botName +
+        " 💙💛",
+    }
   );
 
   const opts = {
