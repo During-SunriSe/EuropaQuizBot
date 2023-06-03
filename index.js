@@ -94,7 +94,7 @@ function start() {
 
     if (text.includes("/sendUser") && curUser.telegramId === ADMIN_ID) {
       let id = text.split(" ")[1];
-      let curText = text.split(" ")[2];
+      let curText = text.split(" ").slice(2).join(" ");
       if (!curText)
         bot.sendMessage(
           id,
