@@ -18,7 +18,12 @@ import {
   questionLength,
 } from "./questions/questions.js";
 import { setInfo } from "./users/sheetsInfo.js";
-import { clearAdmin, clearAll, clearUser } from "./redisConnect.js";
+import {
+  clearAdmin,
+  clearAll,
+  clearUser,
+  saveUsersRedis,
+} from "./redisConnect.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -72,6 +77,11 @@ function start() {
       return;
     }
 
+    if (text === "/save" && curUser.telegramId === ADMIN_ID) {
+      await saveUsersRedis();
+      return;
+    }
+
     if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
       clearAdmin();
       return;
@@ -79,6 +89,18 @@ function start() {
 
     if (text.includes("/clearUser") && curUser.telegramId === ADMIN_ID) {
       clearUser(text);
+      return;
+    }
+
+    if (text.includes("/sendUser") && curUser.telegramId === ADMIN_ID) {
+      let id = text.split(" ")[1];
+      let curText = text.split(" ")[2];
+      if (!curText)
+        bot.sendMessage(
+          id,
+          "Привіт, я бачу, що в тебе виникла технічна проблема. Мені дуже шкода 🙁 Я вже сповістив свого помічника, напиши йому, будь ласка, він тобі допоможе!!\n\n@BohdanTut"
+        );
+      else bot.sendMessage(id, curText);
       return;
     }
 
@@ -124,7 +146,7 @@ function start() {
       } else if (curUser.isOutQuiz) {
         await endMenu(curUser);
       } else if (!curUser.gender) {
-        if (text === "Так!") await chooseGender(curUser);
+        if (text.toLowerCase().includes("так")) await chooseGender(curUser);
       } else
         await bot.sendMessageDelay(
           curUser,
@@ -988,7 +1010,7 @@ async function sendHelp(curUser, text) {
   }
   await bot.sendMessageDelay(
     curUser,
-    "Повідомлення відправлено. Сподіваємося, що зможемо тобі допомогти! 🥺"
+    "Повідомлення відправлено. Сподіваємося, що зможемо тобі допомогти! 😉"
   );
 
   curUser.helpAsking = false;
