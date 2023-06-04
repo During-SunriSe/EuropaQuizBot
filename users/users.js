@@ -7,6 +7,8 @@ export async function userCheck(msgFrom) {
   if (!savedUser) {
     savedUser = new User(msgFrom.id, msgFrom.username);
     users.push(savedUser);
+  } else if (savedUser.username !== msgFrom.username) {
+    savedUser.username = msgFrom.username;
   }
   return savedUser;
 }
