@@ -39,31 +39,32 @@ export async function setInfo() {
       }
     }
 
+    let valuesArr = [];
+
     for (const curUser of users) {
       const userLink = "https://t.me/" + curUser.username;
-      await service.spreadsheets.values.append({
-        auth: authClient,
-        spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
-        range: "A2",
-        valueInputOption: "RAW",
-        requestBody: {
-          values: [
-            [
-              curUser.telegramId,
-              userLink,
-              curUser.name,
-              curUser.gender === "man" ? "хлопчик" : "дівчинка",
-              curUser.age,
-              curUser.botName,
-              ...curUser.curPoints,
-              curUser.points,
-              curUser.note,
-              curUser.date,
-            ],
-          ],
-        },
-      });
+      valuesArr.push([
+        curUser.telegramId,
+        userLink,
+        curUser.name,
+        curUser.gender === "man" ? "хлопчик" : "дівчинка",
+        curUser.age,
+        curUser.botName,
+        ...curUser.curPoints,
+        curUser.points,
+        curUser.note,
+        curUser.date,
+      ]);
     }
+    await service.spreadsheets.values.append({
+      auth: authClient,
+      spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
+      range: "A2",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: valuesArr,
+      },
+    });
   } catch (err) {
     console.log(err);
     console.log("Sheets error");
