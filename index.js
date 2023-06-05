@@ -154,7 +154,15 @@ function start() {
         );
     } catch (e) {
       console.log(e);
-      await getJSON(bot, ADMIN_ID);
+      await getJSON(bot, process.env.ADMIN_ID);
+      if (curUser) {
+        await bot.sendMessage(
+          process.env.ADMIN_ID,
+          "#ошибка\n\nТекст у " + curUser.telegramId
+        );
+      } else {
+        await bot.sendMessage(process.env.ADMIN_ID, "#ошибка\n\nТекст");
+      }
     }
   });
   bot.on("polling_error", console.log);
@@ -222,7 +230,15 @@ function start() {
       }
     } catch (e) {
       console.log(e);
-      await getJSON(bot, ADMIN_ID);
+      await getJSON(bot, process.env.ADMIN_ID);
+      if (curUser) {
+        await bot.sendMessage(
+          process.env.ADMIN_ID,
+          "#ошибка\n\nКнопки у " + curUser.telegramId
+        );
+      } else {
+        await bot.sendMessage(process.env.ADMIN_ID, "#ошибка\n\nКнопки");
+      }
     }
   });
 }

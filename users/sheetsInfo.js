@@ -66,7 +66,7 @@ export async function setInfo() {
     }
   } catch (err) {
     console.log(err);
-
-    process.exit(1);
+    console.log("Sheets error");
+    // process.exit(1);
   }
 }

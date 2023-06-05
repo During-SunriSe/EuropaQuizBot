@@ -31,14 +31,12 @@ try {
   } catch (err) {
     console.log(err);
 
-    process.exit(1);
+    console.log("Write json problem");
   }
   await client.disconnect();
 } catch (e) {
   console.log(e);
   console.log("Redis problem");
-
-  process.exit(1);
 }
 
 export async function saveUsersRedis() {
@@ -51,6 +49,7 @@ export async function saveUsersRedis() {
     await client.disconnect();
   } catch (e) {
     console.log(e);
+    console.log("SaveUsers problem");
   }
 }
 
