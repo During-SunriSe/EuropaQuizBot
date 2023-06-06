@@ -36,7 +36,7 @@ const ADMIN_ID = parseInt(process.env.ADMIN_ID);
 
 process.on("uncaughtException", async (error, source) => {
   console.log(error, source);
-  await bot.sendDocument(process.env.ADMIN_ID, "./users/users.json");
+  await bot.sendDocument(ADMIN_ID, "./users/users.json");
 });
 
 bot.setMyCommands([
@@ -49,67 +49,67 @@ function start() {
   save();
 
   bot.on("message", async (msg) => {
-    const text = msg.text;
-    const curUser = await userCheck(msg.from);
-
-    if (curUser.botIsTexting === true) return;
-
-    if (curUser.isSending) {
-      if (text?.toLowerCase() === "скасувати") {
-        await bot.sendMessageDelay(
-          curUser,
-          "Шкода, 😔 але ти завжди можеш зробити це пізніше!"
-        );
-        curUser.isSending = false;
-      } else if (msg.photo || msg.document) {
-        await sendIllustration(curUser, msg);
-      } else {
-        await bot.sendMessageDelay(curUser, "Чекаю на файл або фото 😌");
-      }
-      return;
-    } else if (!text) {
-      await bot.sendMessageDelay(curUser, "Пробач, я тебе не розумію");
-      return;
-    }
-
-    if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
-      await getJSON(bot, ADMIN_ID);
-      return;
-    }
-
-    if (text === "/save" && curUser.telegramId === ADMIN_ID) {
-      await saveUsersRedis();
-      return;
-    }
-
-    if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
-      clearAdmin();
-      return;
-    }
-
-    if (text.includes("/clearUser") && curUser.telegramId === ADMIN_ID) {
-      clearUser(text);
-      return;
-    }
-
-    if (text.includes("/sendUser") && curUser.telegramId === ADMIN_ID) {
-      let id = text.split(" ")[1];
-      let curText = text.split(" ").slice(2).join(" ");
-      if (!curText)
-        bot.sendMessage(
-          id,
-          "Привіт, я бачу, що в тебе виникла технічна проблема. Мені дуже шкода 🙁 Я вже сповістив свого помічника, напиши йому, будь ласка, він тобі допоможе!!\n\n@BohdanTut"
-        );
-      else bot.sendMessage(id, curText);
-      return;
-    }
-
-    if (text === "/clearAll" && curUser.telegramId === ADMIN_ID) {
-      clearAll();
-      return;
-    }
-
     try {
+      const text = msg.text;
+      const curUser = await userCheck(msg.from);
+
+      if (curUser.botIsTexting === true) return;
+
+      if (curUser.isSending) {
+        if (text?.toLowerCase() === "скасувати") {
+          await bot.sendMessageDelay(
+            curUser,
+            "Шкода, 😔 але ти завжди можеш зробити це пізніше!"
+          );
+          curUser.isSending = false;
+        } else if (msg.photo || msg.document) {
+          await sendIllustration(curUser, msg);
+        } else {
+          await bot.sendMessageDelay(curUser, "Чекаю на файл або фото 😌");
+        }
+        return;
+      } else if (!text) {
+        await bot.sendMessageDelay(curUser, "Пробач, я тебе не розумію");
+        return;
+      }
+
+      if (text === "/getJSON" && curUser.telegramId === ADMIN_ID) {
+        await getJSON(bot, ADMIN_ID);
+        return;
+      }
+
+      if (text === "/save" && curUser.telegramId === ADMIN_ID) {
+        await saveUsersRedis();
+        return;
+      }
+
+      if (text === "/clear" && curUser.telegramId === ADMIN_ID) {
+        clearAdmin();
+        return;
+      }
+
+      if (text.includes("/clearUser") && curUser.telegramId === ADMIN_ID) {
+        clearUser(text);
+        return;
+      }
+
+      if (text.includes("/sendUser") && curUser.telegramId === ADMIN_ID) {
+        let id = text.split(" ")[1];
+        let curText = text.split(" ").slice(2).join(" ");
+        if (!curText)
+          bot.sendMessage(
+            id,
+            "Привіт, я бачу, що в тебе виникла технічна проблема. Мені дуже шкода 🙁 Я вже сповістив свого помічника, напиши йому, будь ласка, він тобі допоможе!!\n\n@BohdanTut"
+          );
+        else bot.sendMessage(id, curText);
+        return;
+      }
+
+      if (text === "/clearAll" && curUser.telegramId === ADMIN_ID) {
+        clearAll();
+        return;
+      }
+
       if (text === "/start") {
         await startScreen(curUser);
       } else if (text === "/info") {
