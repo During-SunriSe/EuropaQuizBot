@@ -49,10 +49,10 @@ function start() {
   save();
 
   bot.on("message", async (msg) => {
-    try {
-      const text = msg.text;
-      const curUser = await userCheck(msg.from);
+    const text = msg.text;
+    const curUser = await userCheck(msg.from);
 
+    try {
       if (curUser.botIsTexting === true) return;
 
       if (curUser.isSending) {
