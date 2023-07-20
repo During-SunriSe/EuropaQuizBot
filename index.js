@@ -153,7 +153,6 @@ function start() {
           "Щоб продовжити, ознайомся з текстом та натисни на кнопку під ним 😉"
         );
     } catch (e) {
-      console.log(e);
       await getJSON(bot, process.env.ADMIN_ID);
       if (curUser) {
         await bot.sendMessage(
@@ -722,7 +721,10 @@ async function sendAnswer(curUser, res) {
   const num = +res.split(" ")[1];
   res = res.split(" ")[0];
   if (res === "problem") {
-    await bot.sendMessageDelay(curUser, "Вкажи варіант відповіді");
+    await bot.sendMessageDelay(
+      curUser,
+      "Вкажи варіант відповіді (1, 2,... тощо)"
+    );
   } else if (res === "incorrect") {
     await bot.sendMessageDelay(
       curUser,

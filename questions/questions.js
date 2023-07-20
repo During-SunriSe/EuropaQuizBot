@@ -35,6 +35,7 @@ export async function optsOptions(questionNumber) {
 }
 
 export async function checkAnswer(questionNumber, input) {
+  if (input.length > 1) return "problem";
   if (
     parseInt(input) > 0 &&
     parseInt(input) <= questions[questionNumber].options.length
