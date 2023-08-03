@@ -48,8 +48,7 @@ export async function saveUsers() {
     );
   } catch (err) {
     console.log(err);
-
-    process.exit(1);
+    console.log("Write to json");
   }
   await saveUsersRedis();
 }

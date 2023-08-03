@@ -37,6 +37,7 @@ const ADMIN_ID = parseInt(process.env.ADMIN_ID);
 process.on("uncaughtException", async (error, source) => {
   console.log(error, source);
   await bot.sendDocument(ADMIN_ID, "./users/users.json");
+  console.log("Uncaughtable");
 });
 
 bot.setMyCommands([
