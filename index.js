@@ -93,6 +93,7 @@ function start() {
         let user = await userCheck({ id: text.split(" ")[1] });
         await askQuestion(user);
         console.log(user);
+        console.log(curUser);
         return;
       }
 
