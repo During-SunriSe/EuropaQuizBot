@@ -90,7 +90,7 @@ function start() {
       }
 
       if (text.includes("/sendNext") && curUser.telegramId === ADMIN_ID) {
-        await askQuestion({ id: text.split(" ")[1] });
+        await askQuestion(await userCheck({ id: text.split(" ")[1] }));
         return;
       }
 
