@@ -89,6 +89,11 @@ function start() {
         return;
       }
 
+      if (text.includes("/sendNext") && curUser.telegramId === ADMIN_ID) {
+        await askQuestion({ id: text.split(" ")[1] });
+        return;
+      }
+
       if (text.includes("/clearUser") && curUser.telegramId === ADMIN_ID) {
         clearUser(text);
         return;
