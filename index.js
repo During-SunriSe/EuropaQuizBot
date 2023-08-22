@@ -159,6 +159,7 @@ function start() {
           "Щоб продовжити, ознайомся з текстом та натисни на кнопку під ним 😉"
         );
     } catch (e) {
+      console.log(e);
       await getJSON(bot, process.env.ADMIN_ID);
       if (curUser) {
         await bot.sendMessage(
