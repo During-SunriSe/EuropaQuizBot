@@ -47,6 +47,7 @@ bot.setMyCommands([
 ]);
 
 function start() {
+  setInterval(async () => await setInfo(), 1000 * 60 * 60);
   save();
 
   bot.on("message", async (msg) => {
@@ -1046,7 +1047,6 @@ async function save() {
   setTimeout(async () => {
     await save();
     await saveUsers();
-    setTimeout(async () => await setInfo(), 1000 * 60 * 2);
   }, 1000 * 60 * 3);
 }
 
