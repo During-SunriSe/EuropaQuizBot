@@ -15,15 +15,16 @@ const authClient = new google.auth.JWT(
 
 export async function setInfo() {
   const users = JSON.parse(fs.readFileSync("./users/users.json").toString());
-  const spreadsheetId = "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc";
 
   try {
-    const { tokens } = await authClient.authorize();
-    authClient.setCredentials(tokens);
+    const token = await authClient.authorize();
+    const spreadsheetId = "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc";
+
+    authClient.setCredentials(token);
 
     await service.spreadsheets.values.clear({
       auth: authClient,
-      spreadsheetId,
+      spreadsheetId: spreadsheetId,
       range: "Лист1",
     });
 
@@ -44,7 +45,7 @@ export async function setInfo() {
     await service.spreadsheets.values.update({
       auth: authClient,
       spreadsheetId,
-      range: `${sheetName}!A1`,
+      range: `Лист1!A1`,
       valueInputOption: "RAW",
       requestBody: { values: [header] },
     });
@@ -62,17 +63,16 @@ export async function setInfo() {
       u.date,
     ]);
 
-    // 3) Записываем их начиная со строки A2
     await service.spreadsheets.values.append({
       auth: authClient,
       spreadsheetId,
-      range: "Лист1!A2",
+      range: `Лист1!A2`,
       valueInputOption: "RAW",
       requestBody: { values: valuesArr },
     });
-
-    console.log("Данные перезаписаны успешно!");
   } catch (err) {
-    console.error("Sheets error:", err);
+    console.log(err);
+    console.log("Sheets error");
+    // process.exit(1);
   }
 }
