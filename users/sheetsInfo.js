@@ -23,7 +23,7 @@ export async function setInfo() {
 
     await service.spreadsheets.values.clear({
       auth: authClient,
-      spreadsheetId,
+      spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
       range: "Лист1",
     });
 
