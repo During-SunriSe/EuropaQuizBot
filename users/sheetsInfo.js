@@ -21,6 +21,12 @@ export async function setInfo() {
 
     authClient.setCredentials(token);
 
+    await service.spreadsheets.values.clear({
+      auth: authClient,
+      spreadsheetId,
+      range: "Лист1",
+    });
+
     const res = await service.spreadsheets.values.get({
       auth: authClient,
       spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
