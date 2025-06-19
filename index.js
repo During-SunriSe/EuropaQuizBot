@@ -47,6 +47,7 @@ bot.setMyCommands([
 ]);
 
 function start() {
+  setInfo();
   setInterval(async () => await setInfo(), 1000 * 60 * 60);
   save();
 

@@ -15,65 +15,64 @@ const authClient = new google.auth.JWT(
 
 export async function setInfo() {
   const users = JSON.parse(fs.readFileSync("./users/users.json").toString());
+  const spreadsheetId = "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc";
 
   try {
-    const token = await authClient.authorize();
-
-    authClient.setCredentials(token);
+    const { tokens } = await authClient.authorize();
+    authClient.setCredentials(tokens);
 
     await service.spreadsheets.values.clear({
       auth: authClient,
-      spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
+      spreadsheetId,
       range: "Лист1",
     });
 
-    const res = await service.spreadsheets.values.get({
+    const curPointsCount = users[0]?.curPoints.length || 0;
+    const header = [
+      "Telegram ID",
+      "Link",
+      "Name",
+      "Gender",
+      "Age",
+      "Bot Name",
+      ...Array.from({ length: curPointsCount }, (_, i) => `Очки${i + 1}`),
+      "Total Points",
+      "Note",
+      "Date",
+    ];
+
+    await service.spreadsheets.values.update({
       auth: authClient,
-      spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
-      range: "A:A",
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "RAW",
+      requestBody: { values: [header] },
     });
 
-    const usersInSheet = [];
+    const valuesArr = users.map(u => [
+      u.telegramId,
+      `https://t.me/${u.username}`,
+      u.name,
+      u.gender === "man" ? "хлопчик" : "дівчинка",
+      u.age,
+      u.botName,
+      ...u.curPoints,
+      u.points,
+      u.note,
+      u.date,
+    ]);
 
-    const rows = res.data.values;
-
-    if (rows.length) {
-      rows.shift();
-
-      for (const row of rows) {
-        usersInSheet.push(row[0]);
-      }
-    }
-
-    let valuesArr = [];
-
-    for (const curUser of users) {
-      const userLink = "https://t.me/" + curUser.username;
-      valuesArr.push([
-        curUser.telegramId,
-        userLink,
-        curUser.name,
-        curUser.gender === "man" ? "хлопчик" : "дівчинка",
-        curUser.age,
-        curUser.botName,
-        ...curUser.curPoints,
-        curUser.points,
-        curUser.note,
-        curUser.date,
-      ]);
-    }
+    // 3) Записываем их начиная со строки A2
     await service.spreadsheets.values.append({
       auth: authClient,
-      spreadsheetId: "16pmQFYrC1cFjnCC4NbjqmNXPiohL10Oy9gAqjRhmbUc",
-      range: "A2",
+      spreadsheetId,
+      range: "Лист1!A2",
       valueInputOption: "RAW",
-      requestBody: {
-        values: valuesArr,
-      },
+      requestBody: { values: valuesArr },
     });
+
+    console.log("Данные перезаписаны успешно!");
   } catch (err) {
-    console.log(err);
-    console.log("Sheets error");
-    // process.exit(1);
+    console.error("Sheets error:", err);
   }
 }
